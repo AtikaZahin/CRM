@@ -1,0 +1,795 @@
+{
+	"info": {
+		"_postman_id": "a8f3e9c1-4b72-4e9a-8c31-9f2d5e7182ab",
+		"name": "CRM System API Collection",
+		"description": "Shared API collection for the AI-powered CRM System (FastAPI backend). Includes authentication, leads, contacts, deals, tasks, notes, and AI chat endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Get API Root / Status",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Check if API backend server is up and running."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registers a new user and returns user info + access token."
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    var token = jsonData.token || jsonData.access_token;",
+									"    if (token) {",
+									"        pm.environment.set('authToken', token);",
+									"        pm.collectionVariables.set('authToken', token);",
+									"        console.log('Saved authToken:', token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticates user credentials and automatically sets {{authToken}} collection variable on success."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Leads",
+			"item": [
+				{
+					"name": "Get All Leads",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/leads?status=new&search=Rahul&limit=10&offset=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leads"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "new",
+									"description": "Filter by status: new, contacted, qualified, lost"
+								},
+								{
+									"key": "search",
+									"value": "Rahul",
+									"description": "Search by name, company, or email"
+								},
+								{
+									"key": "assigned_to",
+									"value": "1",
+									"disabled": true,
+									"description": "Filter by assigned user ID"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Retrieve list of leads with optional filtering and search."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Lead",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Rahul Sharma\",\n  \"company\": \"Infosys\",\n  \"email\": \"rahul@infosys.com\",\n  \"phone\": \"+919876543210\",\n  \"status\": \"new\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/leads",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leads"
+							]
+						},
+						"description": "Create a new lead in the CRM."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Lead By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/leads/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leads",
+								"1"
+							]
+						},
+						"description": "Get detailed lead information by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Lead",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Rahul Sharma\",\n  \"company\": \"Infosys Ltd\",\n  \"email\": \"rahul.s@infosys.com\",\n  \"phone\": \"+919876543210\",\n  \"status\": \"contacted\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/leads/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leads",
+								"1"
+							]
+						},
+						"description": "Update existing lead details by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Lead",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/leads/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leads",
+								"1"
+							]
+						},
+						"description": "Delete a lead by ID."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Contacts",
+			"item": [
+				{
+					"name": "Get All Contacts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/contacts?search=Priya&limit=10&offset=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contacts"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Priya",
+									"description": "Search by contact name, company, or email"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Retrieve list of contacts."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Contact",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Priya Patel\",\n  \"company\": \"TCS\",\n  \"email\": \"priya@tcs.com\",\n  \"phone\": \"+919812345678\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/contacts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contacts"
+							]
+						},
+						"description": "Create a new contact."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Contact By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/contacts/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contacts",
+								"1"
+							]
+						},
+						"description": "Retrieve contact details by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Contact",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Priya Patel\",\n  \"company\": \"TCS Global\",\n  \"email\": \"priya.p@tcs.com\",\n  \"phone\": \"+919812345678\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/contacts/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contacts",
+								"1"
+							]
+						},
+						"description": "Update contact details by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Contact",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/contacts/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"contacts",
+								"1"
+							]
+						},
+						"description": "Delete a contact by ID."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Deals",
+			"item": [
+				{
+					"name": "Get All Deals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/deals?stage=proposal&contact_id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"deals"
+							],
+							"query": [
+								{
+									"key": "stage",
+									"value": "proposal",
+									"description": "Filter by stage: lead, qualification, proposal, negotiation, closed_won, closed_lost"
+								},
+								{
+									"key": "contact_id",
+									"value": "1",
+									"description": "Filter deals linked to contact ID"
+								},
+								{
+									"key": "search",
+									"value": "Enterprise",
+									"disabled": true,
+									"description": "Search deal title"
+								}
+							]
+						},
+						"description": "Retrieve deals pipeline."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Deal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Enterprise Cloud Migration\",\n  \"amount\": 50000.00,\n  \"stage\": \"proposal\",\n  \"contact_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/deals",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"deals"
+							]
+						},
+						"description": "Create a new deal."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Deal By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/deals/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"deals",
+								"1"
+							]
+						},
+						"description": "Retrieve deal details by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Deal",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Enterprise Cloud Migration\",\n  \"amount\": 55000.00,\n  \"stage\": \"negotiation\",\n  \"contact_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/deals/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"deals",
+								"1"
+							]
+						},
+						"description": "Update deal details or stage."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Deal",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/deals/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"deals",
+								"1"
+							]
+						},
+						"description": "Delete a deal by ID."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "Get All Tasks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/tasks?completed=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "completed",
+									"value": "false",
+									"description": "Filter by status: true or false"
+								},
+								{
+									"key": "assigned_to",
+									"value": "1",
+									"disabled": true,
+									"description": "Filter by assigned user ID"
+								}
+							]
+						},
+						"description": "Retrieve tasks list."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Follow up with Rahul from Infosys\",\n  \"description\": \"Send updated proposal and pricing breakdown\",\n  \"due_date\": \"2026-08-15T10:00:00Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks"
+							]
+						},
+						"description": "Create a new task."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/tasks/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"1"
+							]
+						},
+						"description": "Retrieve task details by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Follow up with Rahul from Infosys\",\n  \"description\": \"Sent proposal. Waiting for response.\",\n  \"due_date\": \"2026-08-15T10:00:00Z\",\n  \"completed\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tasks/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"1"
+							]
+						},
+						"description": "Update task details or completion state."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Task",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/tasks/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"1"
+							]
+						},
+						"description": "Delete a task by ID."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notes",
+			"item": [
+				{
+					"name": "Get All Notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/notes?lead_id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"notes"
+							],
+							"query": [
+								{
+									"key": "lead_id",
+									"value": "1",
+									"description": "Filter notes by lead ID"
+								},
+								{
+									"key": "contact_id",
+									"value": "1",
+									"disabled": true,
+									"description": "Filter notes by contact ID"
+								}
+							]
+						},
+						"description": "Retrieve notes attached to leads or contacts."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Note",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Had discovery call with client. Interested in custom tier pricing.\",\n  \"lead_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/notes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"notes"
+							]
+						},
+						"description": "Add a new note to a lead or contact."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Note",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/notes/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"notes",
+								"1"
+							]
+						},
+						"description": "Delete note by ID."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "AI Chat",
+			"item": [
+				{
+					"name": "Send AI Natural Language Command",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Add a new lead: Rahul Sharma from Infosys, email rahul@infosys.com, phone 9876543210\",\n  \"conversation_id\": \"conv-mobile-001\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ai/chat",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ai",
+								"chat"
+							]
+						},
+						"description": "Send natural language message from Android/Web to AI agent, which triggers appropriate MCP tool call."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
