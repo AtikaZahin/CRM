@@ -273,7 +273,7 @@ CRM/
 |---|---|---|---|
 | 0.1 | Set up Git repo + branching strategy (`main` → `dev` → feature branches) | Everyone | ⬜ |
 | 0.2 | Define and document API contract in `docs/api-contract.md` | Everyone | ⬜ |
-| 0.3 | Set up shared Postman/Insomnia collection for API testing | Everyone | ⬜ |
+| 0.3 | Set up shared Postman/Insomnia collection for API testing | Everyone | ✅ |
 | 0.4 | Agree on dev environment (Python 3.11+, Node 18+, Android Studio) | Everyone | ⬜ |
 | 0.5 | Create `.env.example` files for all services | Everyone | ⬜ |
 
