@@ -275,7 +275,7 @@ CRM/
 | 0.2 | Define and document API contract in `docs/api-contract.md` | Everyone | ⬜ |
 | 0.3 | Set up shared Postman/Insomnia collection for API testing | Everyone | ✅ |
 | 0.4 | Agree on dev environment (Python 3.11+, Node 18+, Android Studio) | Everyone | ⬜ |
-| 0.5 | Create `.env.example` files for all services | Everyone | ⬜ |
+| 0.5 | Create `.env.example` files for all services | Everyone | ✅ |
 
 **Deliverable:** Everyone can run their local dev environment + API contract is documented.
 
@@ -341,7 +341,7 @@ CRM/
 
 | # | Task | Files | Status |
 |---|---|---|---|
-| 3.1 | Set up Vite + React + TypeScript + React Router | `package.json`, `App.tsx` | ⬜ |
+| 3.1 | Set up Vite + React + TypeScript + React Router | `package.json`, `App.tsx` | ✅ |
 | 3.2 | Create Dashboard layout (sidebar + top nav) | `layouts/DashboardLayout.tsx` | ⬜ |
 | 3.3 | Build Navbar component | `components/Navbar.tsx` | ⬜ |
 | 3.4 | Build Sidebar component | `components/Sidebar.tsx` | ⬜ |
