@@ -341,7 +341,7 @@ CRM/
 
 | # | Task | Files | Status |
 |---|---|---|---|
-| 3.1 | Set up Vite + React + TypeScript + React Router | `package.json`, `App.tsx` | ⬜ |
+| 3.1 | Set up Vite + React + TypeScript + React Router | `package.json`, `App.tsx` | ✅ |
 | 3.2 | Create Dashboard layout (sidebar + top nav) | `layouts/DashboardLayout.tsx` | ⬜ |
 | 3.3 | Build Navbar component | `components/Navbar.tsx` | ⬜ |
 | 3.4 | Build Sidebar component | `components/Sidebar.tsx` | ⬜ |
