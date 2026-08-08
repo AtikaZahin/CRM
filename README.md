@@ -342,18 +342,18 @@ CRM/
 | # | Task | Files | Status |
 |---|---|---|---|
 | 3.1 | Set up Vite + React + TypeScript + React Router | `package.json`, `App.tsx` | ✅ |
-| 3.2 | Create Dashboard layout (sidebar + top nav) | `layouts/DashboardLayout.tsx` | ⬜ |
-| 3.3 | Build Navbar component | `components/Navbar.tsx` | ⬜ |
-| 3.4 | Build Sidebar component | `components/Sidebar.tsx` | ⬜ |
-| 3.5 | Build Login page | `pages/LoginPage.tsx` | ⬜ |
-| 3.6 | Build Auth context (JWT storage, protected routes) | `context/AuthContext.tsx` | ⬜ |
-| 3.7 | Build API service layer (axios + JWT interceptor) | `services/api.ts` | ⬜ |
-| 3.8 | Build Dashboard page (stat cards, overview) | `pages/DashboardPage.tsx`, `components/StatCard.tsx` | ⬜ |
-| 3.9 | Build Leads page (table + add/edit modals) | `pages/LeadsPage.tsx`, `components/LeadCard.tsx` | ⬜ |
-| 3.10 | Build Contacts page | `pages/ContactsPage.tsx` | ⬜ |
-| 3.11 | Build Deals page (kanban/pipeline board) | `pages/DealsPage.tsx`, `components/DealPipelineBoard.tsx` | ⬜ |
-| 3.12 | Build Tasks page | `pages/TasksPage.tsx` | ⬜ |
-| 3.13 | Use mock data for all pages initially | — | ⬜ |
+| 3.2 | Create Dashboard layout (sidebar + top nav) | `layouts/DashboardLayout.tsx` | ✅ |
+| 3.3 | Build Navbar component | `components/Navbar.tsx` | ✅ |
+| 3.4 | Build Sidebar component | `components/Sidebar.tsx` | ✅ |
+| 3.5 | Build Login page | `pages/LoginPage.tsx` | ✅ |
+| 3.6 | Build Auth context (JWT storage, protected routes) | `context/AuthContext.tsx` | ✅ |
+| 3.7 | Build API service layer (axios + JWT interceptor) | `services/api.ts` | ✅ |
+| 3.8 | Build Dashboard page (stat cards, overview) | `pages/DashboardPage.tsx`, `components/StatCard.tsx` | ✅ |
+| 3.9 | Build Leads page (table + add/edit modals) | `pages/LeadsPage.tsx`, `components/LeadCard.tsx` | ✅ |
+| 3.10 | Build Contacts page | `pages/ContactsPage.tsx` | ✅ |
+| 3.11 | Build Deals page (kanban/pipeline board) | `pages/DealsPage.tsx`, `components/DealPipelineBoard.tsx` | ✅ |
+| 3.12 | Build Tasks page | `pages/TasksPage.tsx` | ✅ |
+| 3.13 | Use mock data for all pages initially | — | ✅ |
 
 **Deliverable:** Full dashboard UI working with mock data.
 
@@ -403,13 +403,13 @@ CRM/
 
 | # | Task | Depends On | Status |
 |---|---|---|---|
-| 6.1 | Connect MCP tools to LIVE backend APIs (replace mocks) | Person 1 endpoints ready | ⬜ |
-| 6.2 | Test: "Add lead Rahul from Infosys" → DB entry created | Task 6.1 | ⬜ |
-| 6.3 | Test: "Show my deals in negotiation" → correct list returned | Task 6.1 | ⬜ |
-| 6.4 | Add error handling (Gemini hallucinated tool, bad params, etc.) | — | ⬜ |
-| 6.5 | Implement conversation memory (last 5 messages as context) | — | ⬜ |
-| 6.6 | Add confirmation step for destructive actions (delete) | — | ⬜ |
-| 6.7 | Test 10+ real user scenarios end to end | — | ⬜ |
+| 6.1 | Connect MCP tools to LIVE backend APIs (replace mocks) | Person 1 endpoints ready | ✅ |
+| 6.2 | Test: "Add lead Rahul from Infosys" → DB entry created | Task 6.1 | ✅ |
+| 6.3 | Test: "Show my deals in negotiation" → correct list returned | Task 6.1 | ✅ |
+| 6.4 | Add error handling (Gemini hallucinated tool, bad params, etc.) | — | ✅ |
+| 6.5 | Implement conversation memory (last 5 messages as context) | — | ✅ |
+| 6.6 | Add confirmation step for destructive actions (delete) | — | ✅ |
+| 6.7 | Test 10+ real user scenarios end to end | — | ✅ |
 
 ---
 

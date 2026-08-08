@@ -30,4 +30,4 @@ def get_chat_session():
     # enable_automatic_function_calling=True tells Gemini to automatically 
     # run the python function when it decides a tool is needed, 
     # and then feed the result back into the model to generate a final answer.
-    return model.start_chat(enable_automatic_function_calling=True)
+    return model.start_chat(enable_automatic_function_calling=False)
