@@ -6,22 +6,35 @@ router = APIRouter(
     tags=["AI"]
 )
 
+import sys
+import os
+# Add ai-agent to Python path so we can import gemini client
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../ai-agent"))
+
+try:
+    from gemini.client import get_chat_session
+    chat = get_chat_session()
+except Exception as e:
+    print(f"Warning: Failed to initialize Gemini chat session: {e}")
+    chat = None
+
 @router.post("/chat", response_model=AIChatResponse)
-async def chat_with_ai(request: AIChatRequest):
+def chat_with_ai(request: AIChatRequest):
     """
     Forward the user's chat message to the AI Agent.
-    This endpoint is ready for Person 2 to integrate the Gemini client logic.
     """
     try:
-        # TODO: Person 2 - Import and call Gemini get_chat_session() here.
-        # Alternatively, if the AI agent becomes a separate microservice, 
-        # make an HTTP request to it from here.
-        
-        # Mock response for now to unblock Person 3 (Frontend) & Person 4 (Android)
-        mock_response = f"This is a mock response from the AI for your message: '{request.message}'. Person 2 will connect Gemini soon!"
+        if not chat:
+            return AIChatResponse(
+                response="AI is currently unavailable. Please check backend logs for API key setup.",
+                actions_taken=[]
+            )
+            
+        # Send the message to Gemini
+        response = chat.send_message(request.message)
         
         return AIChatResponse(
-            response=mock_response,
+            response=response.text,
             actions_taken=[]
         )
     except Exception as e:
