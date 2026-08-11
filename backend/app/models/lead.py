@@ -8,7 +8,9 @@ class Lead(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    email = Column(String, index=True)
+    company = Column(String, index=True, nullable=True)
+    email = Column(String, index=True, nullable=True)
+    phone = Column(String, nullable=True)
     status = Column(String, default="New")
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     owner_id = Column(Integer, ForeignKey("users.id"))

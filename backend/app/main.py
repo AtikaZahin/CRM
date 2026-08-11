@@ -27,9 +27,10 @@ Base.metadata.create_all(bind=engine)
 def read_root():
     return {"message": "Welcome to the Capstone API"}
 
-from app.routers import auth, leads, contacts, deals, tasks
+from app.routers import auth, leads, contacts, deals, tasks, ai
 app.include_router(auth.router)
 app.include_router(leads.router)
 app.include_router(contacts.router)
 app.include_router(deals.router)
 app.include_router(tasks.router)
+app.include_router(ai.router)

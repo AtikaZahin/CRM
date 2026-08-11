@@ -4,7 +4,9 @@ from typing import Optional
 
 class LeadBase(BaseModel):
     name: str
+    company: Optional[str] = None
     email: Optional[EmailStr] = None
+    phone: Optional[str] = None
     status: str = "New"
 
 class LeadCreate(LeadBase):
