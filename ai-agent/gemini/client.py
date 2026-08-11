@@ -3,8 +3,9 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from .function_defs import crm_tools
 
-# Load environment variables (API Key)
-load_dotenv()
+# Load environment variables (API Key) from ai-agent/.env
+env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+load_dotenv(dotenv_path=env_path)
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key or api_key == "your_api_key_here":

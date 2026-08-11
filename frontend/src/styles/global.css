@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-base: #0B0F1A;        /* main page background - deep navy-black */
+  --bg-surface: #131826;      /* sidebar, header */
+  --bg-card: #1A2133;         /* card background - slightly lighter than surface */
+  --bg-card-hover: #212940;   /* card hover state */
+  --border-color: rgba(255, 255, 255, 0.08);
+  
+  --primary-color: #8B5CF6;   /* violet - replaces blue for brand/active states */
+  --primary-hover: #7C3AED;
+  
+  --success-color: #10B981;   /* green - Create actions, Won deals */
+  --warning-color: #F59E0B;   /* amber - Edit/Negotiating */
+  --danger-color: #EF4444;    /* red - Delete */
+  --info-color: #06B6D4;      /* teal - neutral info/New status */
+  
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+
+  --font-family: 'Poppins', sans-serif;
+  --border-radius: 0px;
+  --transition: all 0.2s ease-in-out;
+  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  --glass-backdrop: blur(10px);
+  --radial-glow: rgba(139, 92, 246, 0.08);
+}
+
+:root[data-theme='light'] {
+  --bg-base: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F1F5F9;
+  --border-color: rgba(0, 0, 0, 0.08);
+  
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  
+  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  --radial-glow: rgba(139, 92, 246, 0.04);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-base);
+  background-image: radial-gradient(circle at top right, var(--radial-glow), transparent 40%);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+h1, h2, h3 { 
+  font-weight: 600; 
+  letter-spacing: -0.02em; 
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Base Layout Classes to replace inline styles */
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+/* Utilities */
+.glass-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--glass-shadow);
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: rgba(11, 15, 26, 0.6);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  outline: none;
+  transition: var(--transition);
+}
+
+.input-field:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+/* Lead Card Redesign */
+.lead-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.lead-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--info-color); /* fallback, will be overridden via inline style for specific status */
+}
+
+.lead-card:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.15);
+}
+
+.lead-card .status-badge {
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--info-color);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.lead-card .actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.lead-card .actions button {
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  transition: opacity 0.2s;
+}
+
+.lead-card .actions button:hover {
+  opacity: 0.8;
+}
+
+.lead-card .actions .edit { 
+  color: var(--warning-color); 
+}
+.lead-card .actions .delete { 
+  color: var(--danger-color); 
+}

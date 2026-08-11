@@ -13,8 +13,8 @@ const Sidebar = () => {
   const getLinkStyle = ({ isActive }: { isActive: boolean }) => ({
     display: 'block',
     padding: '0.75rem 1rem',
-    borderRadius: '8px',
     marginBottom: '0.5rem',
+    textDecoration: 'none',
     color: isActive ? 'white' : 'var(--text-secondary)',
     backgroundColor: isActive ? 'var(--primary-color)' : 'transparent',
     fontWeight: isActive ? '600' : '400',

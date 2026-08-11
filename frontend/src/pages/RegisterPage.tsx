@@ -1,31 +1,26 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
-
+import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
-      const formData = new URLSearchParams();
-      formData.append('username', email);
-      formData.append('password', password);
-      
-      const response = await api.post('/login', formData, {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      await api.post('/register', {
+        email,
+        password
       });
-      
-      const { access_token } = response.data;
-      login(access_token, { email });
+      setSuccess(true);
+      setTimeout(() => navigate('/login'), 2000);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed');
+      setError(err.response?.data?.detail || 'Registration failed');
     }
   };
 
@@ -43,10 +38,11 @@ const LoginPage = () => {
         maxWidth: '400px',
         textAlign: 'center'
       }}>
-        <h2 style={{ marginBottom: '0.5rem', fontSize: '1.75rem' }}>Welcome Back</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Sign in to Capstone CRM</p>
+        <h2 style={{ marginBottom: '0.5rem', fontSize: '1.75rem' }}>Create Account</h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Sign up for Capstone CRM</p>
         
         {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem' }}>{error}</div>}
+        {success && <div style={{ color: 'var(--success-color)', marginBottom: '1rem' }}>Registration successful! Redirecting to login...</div>}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
@@ -69,17 +65,17 @@ const LoginPage = () => {
               required
             />
           </div>
-          <button type="submit" className="btn-primary" style={{ marginTop: '1rem' }}>
-            Sign In
+          <button type="submit" className="btn-primary" style={{ marginTop: '1rem' }} disabled={success}>
+            Sign Up
           </button>
         </form>
 
         <div style={{ marginTop: '1.5rem', color: 'var(--text-secondary)' }}>
-          Don't have an account? <Link to="/register" style={{ color: 'var(--primary-color)' }}>Sign up here</Link>
+          Already have an account? <Link to="/login" style={{ color: 'var(--primary-color)' }}>Sign in here</Link>
         </div>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
