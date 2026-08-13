@@ -7,6 +7,8 @@ from .function_defs import crm_tools
 env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path=env_path)
 api_key = os.getenv("GEMINI_API_KEY")
+raw_model = os.getenv("GEMINI_MODEL", "models/gemini-3.5-flash")
+model_name = raw_model if raw_model.startswith("models/") else f"models/{raw_model}"
 
 if not api_key or api_key == "your_api_key_here":
     raise ValueError("Missing GEMINI_API_KEY. Please add it to your .env file in the ai-agent folder.")
@@ -21,14 +23,11 @@ with open(prompt_path, "r") as f:
 
 # Initialize the model with the CRM tools
 model = genai.GenerativeModel(
-    model_name="gemini-3.5-flash",
+    model_name=model_name,
     tools=crm_tools,
     system_instruction=system_instruction
 )
 
 def get_chat_session():
     """Returns an active chat session that remembers conversation history."""
-    # enable_automatic_function_calling=True tells Gemini to automatically 
-    # run the python function when it decides a tool is needed, 
-    # and then feed the result back into the model to generate a final answer.
-    return model.start_chat(enable_automatic_function_calling=False)
+    return model.start_chat(enable_automatic_function_calling=True)
