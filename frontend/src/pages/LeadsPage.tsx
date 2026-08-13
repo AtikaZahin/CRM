@@ -21,7 +21,6 @@ const LeadsPage = () => {
   const [formData, setFormData] = useState({ name: '', company: '', email: '', status: 'New' });
   const [loading, setLoading] = useState(true);
 
-  // Fetch leads from backend on mount
   useEffect(() => {
     fetchLeads();
   }, []);
@@ -49,7 +48,7 @@ const LeadsPage = () => {
       setIsModalOpen(false);
       setEditingLeadId(null);
       setFormData({ name: '', company: '', email: '', status: 'New' });
-      fetchLeads(); // refresh list from backend
+      fetchLeads();
       toast.success(editingLeadId ? 'Lead updated successfully' : 'Lead created successfully');
     } catch (err) {
       console.error('Failed to save lead', err);
@@ -83,18 +82,30 @@ const LeadsPage = () => {
     setIsModalOpen(true);
   };
 
-  if (loading) return <div>Loading leads...</div>;
+  if (loading) {
+    return (
+      <div style={{ paddingTop: 60, textAlign: 'center' }}>
+        <div className="spinner" style={{ marginTop: 40 }} />
+        <p style={{ marginTop: 16, color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+          Loading leads…
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 600 }}>Leads</h1>
-        <button onClick={openAddModal} className="btn-primary">
+    <>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <p className="section-label" style={{ marginBottom: 4 }}>Prospects</p>
+          <h1 className="page-title">Leads</h1>
+        </div>
+        <button onClick={openAddModal} className="btn btn-primary">
           + Add Lead
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
         {leads.map(lead => (
           <LeadCard
             key={lead.id}
@@ -109,40 +120,53 @@ const LeadsPage = () => {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingLeadId ? "Edit Lead" : "Add Lead"}>
-        <form onSubmit={handleSaveLead} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <input
-            className="input-field"
-            placeholder="Full Name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-          />
-          <input
-            className="input-field"
-            placeholder="Company"
-            value={formData.company}
-            onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-            required
-          />
-          <input
-            type="email"
-            className="input-field"
-            placeholder="Email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            required
-          />
-          <select
-            className="input-field"
-            style={{ backgroundColor: 'var(--bg-surface)' }}
-            value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          >
-            <option value="New">New</option>
-            <option value="Contacted">Contacted</option>
-            <option value="Qualified">Qualified</option>
-          </select>
-          <button type="submit" className="btn-primary" style={{ marginTop: '1rem' }}>Save Lead</button>
+        <form onSubmit={handleSaveLead} className="stack gap-12">
+          <div className="field">
+            <label className="label">Full Name</label>
+            <input
+              className="input"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="label">Company</label>
+            <input
+              className="input"
+              placeholder="Company"
+              value={formData.company}
+              onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="label">Email</label>
+            <input
+              type="email"
+              className="input"
+              placeholder="Email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="label">Status</label>
+            <select
+              className="input"
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            >
+              <option value="New">New</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Qualified">Qualified</option>
+            </select>
+          </div>
+          <button type="submit" className="btn btn-primary" style={{ marginTop: 8, justifyContent: 'center' }}>
+            {editingLeadId ? "Update Lead" : "Save Lead"}
+          </button>
         </form>
       </Modal>
 
@@ -153,7 +177,7 @@ const LeadsPage = () => {
         title="Delete Lead"
         message="Are you sure you want to delete this lead? This action cannot be undone."
       />
-    </div>
+    </>
   );
 };
 

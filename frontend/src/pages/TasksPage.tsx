@@ -48,7 +48,6 @@ const TasksPage = () => {
       };
       
       if (editingId) {
-        // If editing, we should probably keep the existing is_completed status
         const existingTask = tasks.find(t => t.id === editingId);
         payload.is_completed = existingTask ? existingTask.is_completed : false;
         await api.put(`/tasks/${editingId}`, payload);
@@ -84,7 +83,6 @@ const TasksPage = () => {
     setEditingId(task.id);
     let formattedDate = '';
     if (task.due_date) {
-      // The input type="date" expects YYYY-MM-DD
       const dateObj = new Date(task.due_date);
       if (!isNaN(dateObj.getTime())) {
         formattedDate = dateObj.toISOString().split('T')[0];
@@ -119,88 +117,118 @@ const TasksPage = () => {
     setFormData({ title: '', description: '', due_date: '' });
   };
 
-  if (loading) return <div>Loading tasks...</div>;
+  if (loading) {
+    return (
+      <div style={{ paddingTop: 60, textAlign: 'center' }}>
+        <div className="spinner" style={{ marginTop: 40 }} />
+        <p style={{ marginTop: 16, color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+          Loading tasks…
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 600 }}>My Tasks</h1>
-        <button onClick={() => setIsModalOpen(true)} className="btn-primary">+ Add Task</button>
+    <>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <p className="section-label" style={{ marginBottom: 4 }}>To-Do List</p>
+          <h1 className="page-title">Tasks</h1>
+        </div>
+        <button onClick={() => setIsModalOpen(true)} className="btn btn-primary">+ Add Task</button>
       </div>
 
-      <div className="glass-panel" style={{ padding: '1.5rem' }}>
-        {tasks.map(task => (
-          <div key={task.id} style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: '1rem 0',
-            borderBottom: '1px solid var(--border-color)',
-            opacity: task.is_completed ? 0.6 : 1
-          }}>
-            <input
-              type="checkbox"
-              checked={task.is_completed}
-              onChange={() => toggleTask(task)}
-              style={{ marginRight: '1rem', width: '1.25rem', height: '1.25rem', cursor: 'pointer' }}
-            />
-            <div style={{ flex: 1 }}>
-              <div style={{
-                fontSize: '1.125rem',
-                textDecoration: task.is_completed ? 'line-through' : 'none'
-              }}>
-                {task.title}
-              </div>
-              {task.description && (
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-                  {task.description}
+      <div className="card card-p">
+        {tasks.length === 0 ? (
+          <p style={{ color: 'var(--muted)', textAlign: 'center', padding: '24px 0', fontFamily: 'var(--font-mono)', fontSize: 13 }}>
+            No tasks found. Click "+ Add Task" to create one.
+          </p>
+        ) : (
+          tasks.map(task => (
+            <div key={task.id} style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '12px 0',
+              borderBottom: '1px solid var(--border)',
+              opacity: task.is_completed ? 0.5 : 1
+            }}>
+              <input
+                type="checkbox"
+                checked={task.is_completed}
+                onChange={() => toggleTask(task)}
+                style={{ marginRight: 16, width: 18, height: 18, cursor: 'pointer', accentColor: 'var(--accent2)' }}
+              />
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontSize: 15,
+                  fontWeight: 500,
+                  textDecoration: task.is_completed ? 'line-through' : 'none',
+                  color: 'var(--ink)'
+                }}>
+                  {task.title}
                 </div>
-              )}
-              <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-                Due: {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
+                {task.description && (
+                  <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>
+                    {task.description}
+                  </div>
+                )}
+                <div style={{ color: 'var(--subtle)', fontSize: 11, marginTop: 4, fontFamily: 'var(--font-mono)' }}>
+                  Due: {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
+                </div>
+              </div>
+              
+              <div className="row gap-6" style={{ marginLeft: 16 }}>
+                <button 
+                  onClick={() => handleEdit(task)}
+                  className="btn btn-ghost btn-sm"
+                  style={{ color: 'var(--child)' }}
+                >
+                  Edit
+                </button>
+                <button 
+                  onClick={() => setDeleteTaskId(task.id)}
+                  className="btn btn-ghost btn-sm"
+                  style={{ color: 'var(--ember)' }}
+                >
+                  Delete
+                </button>
               </div>
             </div>
-            
-            <div style={{ display: 'flex', gap: '0.5rem', marginLeft: '1rem' }}>
-              <button 
-                onClick={() => handleEdit(task)}
-                style={{ background: 'transparent', border: '1px solid var(--primary-color)', color: 'var(--primary-color)', padding: '0.25rem 0.5rem', cursor: 'pointer' }}
-              >
-                Edit
-              </button>
-              <button 
-                onClick={() => setDeleteTaskId(task.id)}
-                style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', padding: '0.25rem 0.5rem', cursor: 'pointer' }}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingId ? "Edit Task" : "Add Task"}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <input
-            className="input-field"
-            placeholder="Task Title"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            required
-          />
-          <input
-            className="input-field"
-            placeholder="Description (optional)"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          />
-          <input
-            type="date"
-            className="input-field"
-            style={{ colorScheme: 'dark' }}
-            value={formData.due_date}
-            onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-          />
-          <button type="submit" className="btn-primary" style={{ marginTop: '1rem' }}>
+        <form onSubmit={handleSubmit} className="stack gap-12">
+          <div className="field">
+            <label className="label">Task Title</label>
+            <input
+              className="input"
+              placeholder="Task Title"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="label">Description (Optional)</label>
+            <input
+              className="input"
+              placeholder="Task details..."
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+          </div>
+          <div className="field">
+            <label className="label">Due Date</label>
+            <input
+              type="date"
+              className="input"
+              value={formData.due_date}
+              onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary" style={{ marginTop: 8, justifyContent: 'center' }}>
             {editingId ? "Update Task" : "Save Task"}
           </button>
         </form>
@@ -213,7 +241,7 @@ const TasksPage = () => {
         title="Delete Task"
         message="Are you sure you want to delete this task? This action cannot be undone."
       />
-    </div>
+    </>
   );
 };
 

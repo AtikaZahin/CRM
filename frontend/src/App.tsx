@@ -17,25 +17,35 @@ function App() {
     <ThemeProvider>
       <Router>
         <AuthProvider>
-        <Toaster 
-          position="top-right" 
-          toastOptions={{ 
-            style: { background: '#1f2937', color: '#f9fafb', border: '1px solid #374151' } 
-          }} 
-        />
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          
-          <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/leads" element={<LeadsPage />} />
-            <Route path="/contacts" element={<ContactsPage />} />
-            <Route path="/deals" element={<DealsPage />} />
-            <Route path="/tasks" element={<TasksPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
-        </Routes>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: '#fdf9f2',
+                color: '#1a1714',
+                border: '1px solid rgba(43,32,19,0.14)',
+                fontFamily: "'Inter', system-ui, sans-serif",
+                fontSize: '13px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 16px rgba(43,32,19,0.12)',
+              },
+              success: { iconTheme: { primary: '#4a5a35', secondary: '#fdf9f2' } },
+              error:   { iconTheme: { primary: '#7a3b3b', secondary: '#fdf9f2' } },
+            }}
+          />
+          <Routes>
+            <Route path="/login"    element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+              <Route path="/"        element={<DashboardPage />} />
+              <Route path="/leads"   element={<LeadsPage />} />
+              <Route path="/contacts"element={<ContactsPage />} />
+              <Route path="/deals"   element={<DealsPage />} />
+              <Route path="/tasks"   element={<TasksPage />} />
+              <Route path="*"        element={<Navigate to="/" replace />} />
+            </Route>
+          </Routes>
         </AuthProvider>
       </Router>
     </ThemeProvider>

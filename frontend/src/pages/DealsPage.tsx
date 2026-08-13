@@ -21,7 +21,7 @@ const DealsPage = () => {
       await api.post('/deals/', payload);
       setIsModalOpen(false);
       setFormData({ title: '', value: '', status: 'Open', contact_id: '' });
-      setRefreshKey(prev => prev + 1); // tells the board to refetch
+      setRefreshKey(prev => prev + 1);
       toast.success('Deal created successfully');
     } catch (err) {
       console.error('Failed to create deal', err);
@@ -30,53 +30,67 @@ const DealsPage = () => {
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 600 }}>Deals Pipeline</h1>
-        <button onClick={() => setIsModalOpen(true)} className="btn-primary">+ New Deal</button>
+    <>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <p className="section-label" style={{ marginBottom: 4 }}>Sales</p>
+          <h1 className="page-title">Deals Pipeline</h1>
+        </div>
+        <button onClick={() => setIsModalOpen(true)} className="btn btn-primary">+ New Deal</button>
       </div>
 
       <DealPipelineBoard key={refreshKey} />
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Deal">
-        <form onSubmit={handleAddDeal} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <input
-            className="input-field"
-            placeholder="Deal Title"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            required
-          />
-          <input
-            type="number"
-            step="0.01"
-            className="input-field"
-            placeholder="Value ($)"
-            value={formData.value}
-            onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-          />
-          <select
-            className="input-field"
-            style={{ backgroundColor: 'var(--bg-surface)' }}
-            value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          >
-            <option value="Open">Open</option>
-            <option value="Negotiating">Negotiating</option>
-            <option value="Won">Won</option>
-            <option value="Lost">Lost</option>
-          </select>
-          <input
-            type="number"
-            className="input-field"
-            placeholder="Linked Contact ID (optional)"
-            value={formData.contact_id}
-            onChange={(e) => setFormData({ ...formData, contact_id: e.target.value })}
-          />
-          <button type="submit" className="btn-primary" style={{ marginTop: '1rem' }}>Save Deal</button>
+        <form onSubmit={handleAddDeal} className="stack gap-12">
+          <div className="field">
+            <label className="label">Deal Title</label>
+            <input
+              className="input"
+              placeholder="Enterprise License"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="label">Value ($)</label>
+            <input
+              type="number"
+              step="0.01"
+              className="input"
+              placeholder="15000"
+              value={formData.value}
+              onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+            />
+          </div>
+          <div className="field">
+            <label className="label">Status</label>
+            <select
+              className="input"
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            >
+              <option value="Open">Open</option>
+              <option value="Negotiating">Negotiating</option>
+              <option value="Won">Won</option>
+              <option value="Lost">Lost</option>
+            </select>
+          </div>
+          <div className="field">
+            <label className="label">Linked Contact ID (Optional)</label>
+            <input
+              type="number"
+              className="input"
+              placeholder="Contact ID"
+              value={formData.contact_id}
+              onChange={(e) => setFormData({ ...formData, contact_id: e.target.value })}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary" style={{ marginTop: 8, justifyContent: 'center' }}>Save Deal</button>
         </form>
       </Modal>
-    </div>
+    </>
   );
 };
 

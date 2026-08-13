@@ -10,71 +10,59 @@ const Navbar = () => {
   const { toggleDrawer } = useChat();
 
   return (
-    <nav style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '1rem 2rem',
-      backgroundColor: 'var(--bg-surface)',
-      borderBottom: '1px solid var(--border-color)',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100
-    }}>
-      <div>
-        <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>Capstone CRM</h2>
+    <nav className="nav">
+      {/* Logo */}
+      <div className="nav-logo">
+        <span className="nav-logo-dot" />
+        Capstone CRM
       </div>
-      
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button 
+
+      {/* Right actions */}
+      <div className="row gap-8">
+        {/* AI Assistant */}
+        <button
           onClick={toggleDrawer}
-          style={{
-            background: 'var(--primary-color)',
-            border: 'none',
-            color: '#fff',
-            padding: '0.5rem 1rem',
-            cursor: 'pointer',
-            borderRadius: '8px',
-            fontSize: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            boxShadow: 'var(--glass-shadow)'
-          }}
+          className="btn btn-ghost btn-sm"
           title="Open AI Assistant"
+          style={{ gap: '6px' }}
         >
-          💬 AI Assistant
+          <span style={{ fontSize: '13px' }}>💬</span>
+          <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)' }}>AI</span>
         </button>
-        <button 
+
+        {/* Theme Toggle */}
+        <button
           onClick={toggleTheme}
-          style={{
-            background: 'transparent',
-            border: '1px solid var(--border-color)',
-            color: 'var(--text-primary)',
-            padding: '0.25rem 0.75rem',
-            cursor: 'pointer',
-            fontSize: '1.25rem'
-          }}
-          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          className="theme-toggle"
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          aria-label="Toggle colour scheme"
         >
-          {theme === 'light' ? '🌙' : '☀️'}
+          {theme === 'dark' ? '☀️' : '🌙'}
         </button>
+
+        {/* User info + logout */}
         {user ? (
           <>
-            <span>Welcome, <strong>{user.name}</strong></span>
-            <button onClick={logout} style={{
-              background: 'transparent',
-              border: '1px solid var(--danger-color)',
-              color: 'var(--danger-color)',
-              padding: '0.5rem 1rem',
-              cursor: 'pointer',
-              transition: 'var(--transition)'
+            <span style={{
+              fontSize: '12px',
+              color: 'var(--muted)',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.02em'
             }}>
-              Logout
+              {user.name || user.email}
+            </span>
+            <button
+              onClick={logout}
+              className="btn btn-outline btn-sm"
+              style={{ borderColor: 'rgba(122,59,59,0.35)', color: 'var(--ember)' }}
+            >
+              Sign out
             </button>
           </>
         ) : (
-          <Link to="/login" style={{ color: 'var(--primary-color)' }}>Login</Link>
+          <Link to="/login" className="btn btn-outline btn-sm">
+            Sign in
+          </Link>
         )}
       </div>
     </nav>

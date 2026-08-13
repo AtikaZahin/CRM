@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import { api } from '../services/api';
 
 const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
-      await api.post('/register', {
-        email,
-        password
-      });
+      await api.post('/register', { email, password });
       setSuccess(true);
       setTimeout(() => navigate('/login'), 2000);
     } catch (err: any) {
@@ -25,53 +25,124 @@ const RegisterPage = () => {
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      padding: '1rem'
-    }}>
-      <div className="glass-panel" style={{
-        padding: '3rem',
-        width: '100%',
-        maxWidth: '400px',
-        textAlign: 'center'
-      }}>
-        <h2 style={{ marginBottom: '0.5rem', fontSize: '1.75rem' }}>Create Account</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Sign up for Capstone CRM</p>
-        
-        {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem' }}>{error}</div>}
-        {success && <div style={{ color: 'var(--success-color)', marginBottom: '1rem' }}>Registration successful! Redirecting to login...</div>}
-
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
-            <input 
-              type="email" 
-              placeholder="Email Address" 
-              className="input-field"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <input 
-              type="password" 
-              placeholder="Password" 
-              className="input-field"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" className="btn-primary" style={{ marginTop: '1rem' }} disabled={success}>
-            Sign Up
+    <div className="auth-page">
+      {/* Minimal auth nav */}
+      <div className="auth-nav">
+        <div className="nav-logo">
+          <span className="nav-logo-dot" />
+          Capstone CRM
+        </div>
+        <div className="row gap-8">
+          <button
+            onClick={toggleTheme}
+            className="theme-toggle"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            aria-label="Toggle colour scheme"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-        </form>
+          <Link to="/login" className="btn btn-outline btn-sm">
+            Sign in
+          </Link>
+        </div>
+      </div>
 
-        <div style={{ marginTop: '1.5rem', color: 'var(--text-secondary)' }}>
-          Already have an account? <Link to="/login" style={{ color: 'var(--primary-color)' }}>Sign in here</Link>
+      {/* Card */}
+      <div className="auth-body">
+        <div className="auth-card">
+          <p className="section-label" style={{ marginBottom: 16 }}>Get started</p>
+          <h2 className="auth-title">Create account</h2>
+          <p className="auth-subtitle">Start managing your pipeline</p>
+
+          {error && (
+            <div style={{
+              marginBottom: 16,
+              padding: '9px 14px',
+              background: 'var(--ember-light)',
+              border: '1px solid rgba(122,59,59,0.2)',
+              borderRadius: 'var(--r)',
+              fontSize: 12,
+              color: 'var(--ember)',
+              fontFamily: 'var(--font-mono)',
+            }}>
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div style={{
+              marginBottom: 16,
+              padding: '9px 14px',
+              background: 'var(--emerald-light)',
+              border: '1px solid rgba(63,92,46,0.2)',
+              borderRadius: 'var(--r)',
+              fontSize: 12,
+              color: 'var(--emerald)',
+              fontFamily: 'var(--font-mono)',
+            }}>
+              Account created — redirecting to sign in…
+            </div>
+          )}
+
+          <form
+            onSubmit={handleSubmit}
+            className="stack gap-12"
+            style={{ marginBottom: 20 }}
+          >
+            <div className="field">
+              <label className="label" htmlFor="reg-name">Full Name</label>
+              <input
+                id="reg-name"
+                type="text"
+                placeholder="Your name"
+                className="input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div className="field">
+              <label className="label" htmlFor="reg-email">Email</label>
+              <input
+                id="reg-email"
+                type="email"
+                placeholder="you@email.com"
+                className="input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="field">
+              <label className="label" htmlFor="reg-password">Password</label>
+              <input
+                id="reg-password"
+                type="password"
+                placeholder="••••••••"
+                className="input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={success}
+              style={{ width: '100%', justifyContent: 'center', marginTop: 4 }}
+            >
+              Create Account
+            </button>
+          </form>
+
+          <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--muted)' }}>
+            Already have an account?{' '}
+            <Link to="/login" style={{ color: 'var(--accent3)', fontWeight: 500 }}>
+              Sign in
+            </Link>
+          </p>
         </div>
       </div>
     </div>

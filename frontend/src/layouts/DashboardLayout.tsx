@@ -8,12 +8,14 @@ import ChatDrawer from '../components/ChatDrawer';
 const DashboardLayout = () => {
   return (
     <ChatProvider>
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div className="layout-root">
         <Navbar />
-        <div style={{ display: 'flex', flex: 1 }}>
+        <div className="layout-body">
           <Sidebar />
-          <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
-            <Outlet />
+          <main className="main-content">
+            <div className="page">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

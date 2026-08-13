@@ -101,103 +101,143 @@ const ContactsPage = () => {
     setFormData({ first_name: '', last_name: '', email: '', phone: '', lead_id: '' });
   };
 
-  if (loading) return <div>Loading contacts...</div>;
+  if (loading) {
+    return (
+      <div style={{ paddingTop: 60, textAlign: 'center' }}>
+        <div className="spinner" style={{ marginTop: 40 }} />
+        <p style={{ marginTop: 16, color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+          Loading contacts…
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 600 }}>Contacts</h1>
-        <button onClick={() => setIsModalOpen(true)} className="btn-primary">
+    <>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <p className="section-label" style={{ marginBottom: 4 }}>Directory</p>
+          <h1 className="page-title">Contacts</h1>
+        </div>
+        <button onClick={() => setIsModalOpen(true)} className="btn btn-primary">
           + Add Contact
         </button>
       </div>
 
-      <div className="glass-panel" style={{ overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+      <div className="table-wrapper">
+        <table className="crm-table">
+          <thead>
             <tr>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>Name</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>Email</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>Phone</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>Linked Lead ID</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>Actions</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Linked Lead ID</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {contacts.map(contact => (
-              <tr key={contact.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <td style={{ padding: '1rem' }}>{contact.first_name} {contact.last_name}</td>
-                <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{contact.email || '—'}</td>
-                <td style={{ padding: '1rem' }}>{contact.phone || '—'}</td>
-                <td style={{ padding: '1rem' }}>
-                  {contact.lead_id ? (
-                    <span style={{
-                      backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                      color: 'var(--primary-color)',
-                      padding: '0.25rem 0.5rem',
-                      fontSize: '0.75rem'
-                    }}>
-                      #{contact.lead_id}
-                    </span>
-                  ) : '—'}
-                </td>
-                <td style={{ padding: '1rem' }}>
-                  <button 
-                    onClick={() => handleEdit(contact)}
-                    style={{ marginRight: '0.5rem', background: 'transparent', border: '1px solid var(--primary-color)', color: 'var(--primary-color)', padding: '0.25rem 0.5rem', cursor: 'pointer' }}
-                  >
-                    Edit
-                  </button>
-                  <button 
-                    onClick={() => setDeleteContactId(contact.id)}
-                    style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', padding: '0.25rem 0.5rem', cursor: 'pointer' }}
-                  >
-                    Delete
-                  </button>
+            {contacts.length === 0 ? (
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'center', padding: '32px', color: 'var(--muted)' }}>
+                  No contacts found. Click "+ Add Contact" to create one.
                 </td>
               </tr>
-            ))}
+            ) : (
+              contacts.map(contact => (
+                <tr key={contact.id}>
+                  <td style={{ fontWeight: 500, color: 'var(--ink)' }}>
+                    {contact.first_name} {contact.last_name}
+                  </td>
+                  <td style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
+                    {contact.email || '—'}
+                  </td>
+                  <td style={{ color: 'var(--ink2)' }}>
+                    {contact.phone || '—'}
+                  </td>
+                  <td>
+                    {contact.lead_id ? (
+                      <span className="badge badge-blue">
+                        #{contact.lead_id}
+                      </span>
+                    ) : '—'}
+                  </td>
+                  <td>
+                    <div className="row gap-6">
+                      <button 
+                        onClick={() => handleEdit(contact)}
+                        className="btn btn-ghost btn-sm"
+                        style={{ color: 'var(--child)' }}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={() => setDeleteContactId(contact.id)}
+                        className="btn btn-ghost btn-sm"
+                        style={{ color: 'var(--ember)' }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingId ? "Edit Contact" : "Add Contact"}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <input
-            className="input-field"
-            placeholder="First Name"
-            value={formData.first_name}
-            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-            required
-          />
-          <input
-            className="input-field"
-            placeholder="Last Name"
-            value={formData.last_name}
-            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-            required
-          />
-          <input
-            type="email"
-            className="input-field"
-            placeholder="Email (optional)"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          />
-          <input
-            className="input-field"
-            placeholder="Phone (optional)"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          />
-          <input
-            type="number"
-            className="input-field"
-            placeholder="Linked Lead ID (optional)"
-            value={formData.lead_id}
-            onChange={(e) => setFormData({ ...formData, lead_id: e.target.value })}
-          />
-          <button type="submit" className="btn-primary" style={{ marginTop: '1rem' }}>
+        <form onSubmit={handleSubmit} className="stack gap-12">
+          <div className="field">
+            <label className="label">First Name</label>
+            <input
+              className="input"
+              placeholder="First Name"
+              value={formData.first_name}
+              onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="label">Last Name</label>
+            <input
+              className="input"
+              placeholder="Last Name"
+              value={formData.last_name}
+              onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="label">Email</label>
+            <input
+              type="email"
+              className="input"
+              placeholder="email@example.com"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            />
+          </div>
+          <div className="field">
+            <label className="label">Phone</label>
+            <input
+              className="input"
+              placeholder="+1 555-0199"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            />
+          </div>
+          <div className="field">
+            <label className="label">Linked Lead ID (Optional)</label>
+            <input
+              type="number"
+              className="input"
+              placeholder="Lead ID"
+              value={formData.lead_id}
+              onChange={(e) => setFormData({ ...formData, lead_id: e.target.value })}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary" style={{ marginTop: 8, justifyContent: 'center' }}>
             {editingId ? "Update Contact" : "Save Contact"}
           </button>
         </form>
@@ -210,7 +250,7 @@ const ContactsPage = () => {
         title="Delete Contact"
         message="Are you sure you want to delete this contact? This action cannot be undone."
       />
-    </div>
+    </>
   );
 };
 

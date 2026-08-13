@@ -14,7 +14,7 @@ const DashboardPage = () => {
     totalLeads: 0,
     activeContacts: 0,
     openDealsValue: 0,
-    pendingTasks: 0
+    pendingTasks: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -28,20 +28,20 @@ const DashboardPage = () => {
         api.get('/leads/'),
         api.get('/contacts/'),
         api.get('/deals/'),
-        api.get('/tasks/')
+        api.get('/tasks/'),
       ]);
 
       const openDealsValue = dealsRes.data
-        .filter((deal: any) => deal.status !== 'Won' && deal.status !== 'Lost')
-        .reduce((sum: number, deal: any) => sum + (deal.value || 0), 0);
+        .filter((d: any) => d.status !== 'Won' && d.status !== 'Lost')
+        .reduce((sum: number, d: any) => sum + (d.value || 0), 0);
 
-      const pendingTasks = tasksRes.data.filter((task: any) => !task.is_completed).length;
+      const pendingTasks = tasksRes.data.filter((t: any) => !t.is_completed).length;
 
       setStats({
         totalLeads: leadsRes.data.length,
         activeContacts: contactsRes.data.length,
         openDealsValue,
-        pendingTasks
+        pendingTasks,
       });
     } catch (err) {
       console.error('Failed to fetch dashboard stats', err);
@@ -50,29 +50,52 @@ const DashboardPage = () => {
     }
   };
 
-  if (loading) return <div>Loading dashboard...</div>;
+  if (loading) {
+    return (
+      <div style={{ paddingTop: 60, textAlign: 'center' }}>
+        <div className="spinner" style={{ marginTop: 40 }} />
+        <p style={{ marginTop: 16, color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+          Loading dashboard…
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h1 style={{ marginBottom: '2rem', fontSize: '2rem', fontWeight: 600 }}>Dashboard Overview</h1>
-
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '1.5rem',
-        marginBottom: '2rem'
-      }}>
-        <StatCard title="Total Leads" value={stats.totalLeads.toLocaleString()} trend="" isPositive={true} />
-        <StatCard title="Active Contacts" value={stats.activeContacts.toLocaleString()} trend="" isPositive={true} />
-        <StatCard title="Open Deals Value" value={`$${stats.openDealsValue.toLocaleString()}`} trend="" isPositive={true} />
-        <StatCard title="Tasks Pending" value={stats.pendingTasks.toString()} trend="" isPositive={false} />
+    <>
+      {/* Page Header */}
+      <div className="page-header">
+        <p className="section-label" style={{ marginBottom: 8 }}>Overview</p>
+        <h1 className="page-title">Dashboard</h1>
+        <p className="page-subtitle">Your pipeline at a glance</p>
       </div>
 
-      <div className="glass-panel" style={{ padding: '2rem', minHeight: '300px' }}>
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Recent Activity</h2>
-        <p style={{ color: 'var(--text-secondary)' }}>Activity feed coming soon — no activity log endpoint yet.</p>
+      {/* Stats */}
+      <div className="stats-grid">
+        <StatCard title="Total Leads"       value={stats.totalLeads.toLocaleString()}           isPositive={true} />
+        <StatCard title="Active Contacts"   value={stats.activeContacts.toLocaleString()}       isPositive={true} />
+        <StatCard title="Open Deals Value"  value={`$${stats.openDealsValue.toLocaleString()}`} isPositive={true} />
+        <StatCard title="Tasks Pending"     value={stats.pendingTasks.toString()}               isPositive={false} />
       </div>
-    </div>
+
+      {/* Recent Activity */}
+      <div className="card card-p" style={{ minHeight: 200 }}>
+        <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 18,
+            fontWeight: 500,
+            fontStyle: 'italic',
+          }}>
+            Recent Activity
+          </h2>
+          <span className="badge badge-neutral">Coming soon</span>
+        </div>
+        <p style={{ color: 'var(--muted)', fontSize: 13, fontFamily: 'var(--font-mono)' }}>
+          Activity feed will appear here once the log endpoint is available.
+        </p>
+      </div>
+    </>
   );
 };
 
