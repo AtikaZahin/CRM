@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from app.auth.dependencies import get_current_user
+from app.models.user import User
 from app.schemas.ai import AIChatRequest, AIChatResponse
 import sys
 import os
@@ -22,7 +24,7 @@ except Exception as e:
     print(f"Warning: Failed to initialize Gemini chat session on startup: {e}")
 
 @router.post("/chat", response_model=AIChatResponse)
-def chat_with_ai(request: AIChatRequest):
+def chat_with_ai(request: AIChatRequest, current_user: User = Depends(get_current_user)):
     """
     Forward the user's chat message to the AI Agent.
     """

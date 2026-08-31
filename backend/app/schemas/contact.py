@@ -7,6 +7,7 @@ class ContactBase(BaseModel):
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
     lead_id: Optional[int] = None
+    owner_id: Optional[int] = None
 
 class ContactCreate(ContactBase):
     pass

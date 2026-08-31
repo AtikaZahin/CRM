@@ -9,7 +9,14 @@ from app.schemas.user import UserCreate, UserResponse
 from app.schemas.token import Token
 from app.auth.jwt_handler import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 
+from app.auth.dependencies import get_current_user
+
 router = APIRouter(tags=["Authentication"])
+
+@router.get("/auth/me", response_model=UserResponse)
+@router.get("/me", response_model=UserResponse)
+def get_me(current_user: User = Depends(get_current_user)):
+    return current_user
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user: UserCreate, db: Session = Depends(get_db)):
@@ -21,6 +28,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         email=user.email,
         hashed_password=hashed_password,
+        role=user.role or "Salesperson",
         is_active=user.is_active
     )
     db.add(new_user)

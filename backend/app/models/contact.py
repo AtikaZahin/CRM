@@ -11,6 +11,8 @@ class Contact(Base):
     email = Column(String, index=True)
     phone = Column(String)
     lead_id = Column(Integer, ForeignKey("leads.id"))
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     lead = relationship("Lead", back_populates="contacts")
+    owner = relationship("User")
     deals = relationship("Deal", back_populates="contact")

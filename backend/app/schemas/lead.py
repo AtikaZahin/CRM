@@ -8,6 +8,7 @@ class LeadBase(BaseModel):
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
     status: str = "New"
+    owner_id: Optional[int] = None
 
 class LeadCreate(LeadBase):
     pass

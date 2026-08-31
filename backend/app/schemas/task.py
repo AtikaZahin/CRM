@@ -9,6 +9,7 @@ class TaskBase(BaseModel):
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
     is_completed: bool = False
+    user_id: Optional[int] = None
 
 class TaskCreate(TaskBase):
     pass

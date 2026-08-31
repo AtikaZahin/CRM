@@ -34,8 +34,9 @@ def get_user_or_agent(
 
 @router.get("/", response_model=List[LeadResponse])
 def read_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    leads = db.query(Lead).offset(skip).limit(limit).all()
-    return leads
+    if current_user.role == "Salesperson":
+        return db.query(Lead).filter(Lead.owner_id == current_user.id).offset(skip).limit(limit).all()
+    return db.query(Lead).offset(skip).limit(limit).all()
 
 @router.post("/", response_model=LeadResponse, status_code=status.HTTP_201_CREATED)
 def create_lead(lead: LeadCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -48,7 +49,15 @@ def create_lead(lead: LeadCreate, db: Session = Depends(get_db), current_user: U
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="A lead with this email already exists"
             )
-    db_lead = Lead(**lead.model_dump(), owner_id=current_user.id)
+
+    owner_id = current_user.id
+    if current_user.role in ["Admin", "Manager"] and lead.owner_id:
+        owner_id = lead.owner_id
+
+    lead_dict = lead.model_dump()
+    lead_dict["owner_id"] = owner_id
+
+    db_lead = Lead(**lead_dict)
     db.add(db_lead)
     db.commit()
     db.refresh(db_lead)
@@ -104,6 +113,8 @@ def read_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = 
     db_lead = db.query(Lead).filter(Lead.id == lead_id).first()
     if db_lead is None:
         raise HTTPException(status_code=404, detail="Lead not found")
+    if current_user.role == "Salesperson" and db_lead.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to view this lead")
     return db_lead
 
 @router.put("/{lead_id}", response_model=LeadResponse)
@@ -111,6 +122,8 @@ def update_lead(lead_id: int, lead: LeadCreate, db: Session = Depends(get_db), c
     db_lead = db.query(Lead).filter(Lead.id == lead_id).first()
     if db_lead is None:
         raise HTTPException(status_code=404, detail="Lead not found")
+    if current_user.role == "Salesperson" and db_lead.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to edit this lead")
     
     if lead.email:
         existing_lead = db.query(Lead).filter(
@@ -123,8 +136,13 @@ def update_lead(lead_id: int, lead: LeadCreate, db: Session = Depends(get_db), c
                 detail="A lead with this email already exists"
             )
     
-    for key, value in lead.model_dump().items():
-        setattr(db_lead, key, value)
+    update_data = lead.model_dump()
+    if current_user.role == "Salesperson":
+        update_data["owner_id"] = db_lead.owner_id
+
+    for key, value in update_data.items():
+        if value is not None or key == "company" or key == "phone":
+            setattr(db_lead, key, value)
     
     db.commit()
     db.refresh(db_lead)
@@ -135,6 +153,8 @@ def delete_lead(lead_id: int, db: Session = Depends(get_db), current_user: User 
     db_lead = db.query(Lead).filter(Lead.id == lead_id).first()
     if db_lead is None:
         raise HTTPException(status_code=404, detail="Lead not found")
+    if current_user.role == "Salesperson" and db_lead.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this lead")
     
     db.delete(db_lead)
     db.commit()
