@@ -39,6 +39,15 @@ def read_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), c
 
 @router.post("/", response_model=LeadResponse, status_code=status.HTTP_201_CREATED)
 def create_lead(lead: LeadCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if lead.email:
+        existing_lead = db.query(Lead).filter(
+            Lead.email.ilike(lead.email.strip())
+        ).first()
+        if existing_lead:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A lead with this email already exists"
+            )
     db_lead = Lead(**lead.model_dump(), owner_id=current_user.id)
     db.add(db_lead)
     db.commit()
@@ -53,6 +62,15 @@ def create_lead_agent(lead: LeadCreate, db: Session = Depends(get_db), x_api_key
     owner = db.query(User).first()
     if not owner:
         raise HTTPException(status_code=500, detail="No users in DB.")
+    if lead.email:
+        existing_lead = db.query(Lead).filter(
+            Lead.email.ilike(lead.email.strip())
+        ).first()
+        if existing_lead:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A lead with this email already exists"
+            )
     db_lead = Lead(**lead.model_dump(), owner_id=owner.id)
     db.add(db_lead)
     db.commit()
@@ -93,6 +111,17 @@ def update_lead(lead_id: int, lead: LeadCreate, db: Session = Depends(get_db), c
     db_lead = db.query(Lead).filter(Lead.id == lead_id).first()
     if db_lead is None:
         raise HTTPException(status_code=404, detail="Lead not found")
+    
+    if lead.email:
+        existing_lead = db.query(Lead).filter(
+            Lead.id != lead_id,
+            Lead.email.ilike(lead.email.strip())
+        ).first()
+        if existing_lead:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A lead with this email already exists"
+            )
     
     for key, value in lead.model_dump().items():
         setattr(db_lead, key, value)

@@ -20,6 +20,15 @@ def read_contacts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 
 @router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
 def create_contact(contact: ContactCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if contact.email:
+        existing_contact = db.query(Contact).filter(
+            Contact.email.ilike(contact.email.strip())
+        ).first()
+        if existing_contact:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A contact with this email already exists"
+            )
     db_contact = Contact(**contact.model_dump())
     db.add(db_contact)
     db.commit()
@@ -39,6 +48,17 @@ def update_contact(contact_id: int, contact: ContactCreate, db: Session = Depend
     if db_contact is None:
         raise HTTPException(status_code=404, detail="Contact not found")
     
+    if contact.email:
+        existing_contact = db.query(Contact).filter(
+            Contact.id != contact_id,
+            Contact.email.ilike(contact.email.strip())
+        ).first()
+        if existing_contact:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A contact with this email already exists"
+            )
+
     for key, value in contact.model_dump().items():
         setattr(db_contact, key, value)
     
