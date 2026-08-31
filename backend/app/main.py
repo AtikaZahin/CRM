@@ -20,8 +20,17 @@ from app.models.deal import Deal
 from app.models.task import Task
 from app.models.note import Note
 
+from sqlalchemy import text
+
 # Create database tables
 Base.metadata.create_all(bind=engine)
+try:
+    with engine.connect() as conn:
+        conn.execute(text("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS start_time TIMESTAMP WITH TIME ZONE;"))
+        conn.execute(text("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS end_time TIMESTAMP WITH TIME ZONE;"))
+        conn.commit()
+except Exception as e:
+    print("Column creation notice:", e)
 
 @app.get("/")
 def read_root():

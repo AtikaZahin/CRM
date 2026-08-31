@@ -9,6 +9,8 @@ class Task(Base):
     title = Column(String, index=True)
     description = Column(String)
     due_date = Column(DateTime, nullable=True)
+    start_time = Column(DateTime, nullable=True)
+    end_time = Column(DateTime, nullable=True)
     is_completed = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey("users.id"))
 
