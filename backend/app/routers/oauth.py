@@ -12,8 +12,11 @@ router = APIRouter(tags=["OAuth"])
 # Global dictionary to temporarily store the OAuth Flow objects (for development/single-worker)
 oauth_states = {}
 
-# The scopes required for Gmail API to send emails
-SCOPES = ['https://www.googleapis.com/auth/gmail.send']
+# The scopes required for Gmail API and Calendar API
+SCOPES = [
+    'https://www.googleapis.com/auth/gmail.send',
+    'https://www.googleapis.com/auth/calendar.events'
+]
 
 def get_client_config():
     # In a real app, these come from .env

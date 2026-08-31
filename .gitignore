@@ -172,3 +172,6 @@ captures/
 # OS files
 .DS_Store
 Thumbs.db
+
+# OAuth credentials
+*google_credentials.json

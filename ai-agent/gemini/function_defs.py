@@ -3,6 +3,7 @@ import os
 import requests
 from dotenv import load_dotenv
 from .email_service import draft_email_content, send_email_via_oauth
+from .calendar_service import get_upcoming_events, schedule_event
 # Load env from ai-agent/.env
 env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path=env_path)
@@ -188,5 +189,29 @@ def send_smart_emails(emails: list[str], campaign_context: str) -> str:
     return summary
 
 
+def check_calendar(max_events: int = 10) -> str:
+    """
+    Checks the user's primary calendar and returns a list of upcoming events.
+    Use this when the user asks about their schedule, meetings, or availability.
+    
+    Args:
+        max_events: The maximum number of events to fetch (default is 10).
+    """
+    return get_upcoming_events(max_events=max_events)
+
+
+def book_meeting(title: str, start_time: str, end_time: str, attendees: list[str] = None) -> str:
+    """
+    Schedules a new meeting/event on the user's calendar.
+    
+    Args:
+        title: The name/summary of the event.
+        start_time: ISO 8601 formatted start time (e.g., '2023-10-25T09:00:00Z' or '2023-10-25T09:00:00-07:00').
+        end_time: ISO 8601 formatted end time.
+        attendees: A list of email addresses of people to invite.
+    """
+    return schedule_event(title, start_time, end_time, attendees)
+
+
 # List of tools to pass to Gemini
-crm_tools = [add_lead, get_leads, delete_lead, get_deals, send_smart_emails]
+crm_tools = [add_lead, get_leads, delete_lead, get_deals, send_smart_emails, check_calendar, book_meeting]
