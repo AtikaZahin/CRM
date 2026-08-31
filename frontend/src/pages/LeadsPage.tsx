@@ -50,9 +50,9 @@ const LeadsPage = () => {
       setFormData({ name: '', company: '', email: '', status: 'New' });
       fetchLeads();
       toast.success(editingLeadId ? 'Lead updated successfully' : 'Lead created successfully');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save lead', err);
-      toast.error('Failed to save lead');
+      toast.error(err.response?.data?.detail || 'Failed to save lead');
     }
   };
 

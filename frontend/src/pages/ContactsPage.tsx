@@ -63,9 +63,9 @@ const ContactsPage = () => {
       handleCloseModal();
       fetchContacts();
       toast.success(editingId ? 'Contact updated successfully' : 'Contact created successfully');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save contact', err);
-      toast.error('Failed to save contact');
+      toast.error(err.response?.data?.detail || 'Failed to save contact');
     }
   };
 

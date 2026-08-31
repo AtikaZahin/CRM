@@ -8,24 +8,24 @@
 
 ```
 ┌──────────────┐         ┌──────────────────┐         ┌──────────────┐
-│  📱 Android  │────────▶│   ⚡ FastAPI     │◀────────│  💻 React    │
+│   Android  │────────▶│    FastAPI     │◀────────│      React    │
 │  App (Chat)  │  REST   │   Backend        │  REST   │  Dashboard   │
 └──────────────┘         └────────┬─────────┘         └──────────────┘
                                   │
                           ┌───────▼────────┐
-                          │  🤖 AI Agent   │
+                          │   AI Agent   │
                           │  (Gemini API)  │
                           └───────┬────────┘
                                   │
                           ┌───────▼────────┐
-                          │  🔧 MCP Server │
+                          │   MCP Server │
                           │  (Tool Calls)  │
                           └───────┬────────┘
                                   │
                     ┌─────────────┼─────────────┐
                     ▼             ▼             ▼
               ┌──────────┐ ┌──────────┐ ┌──────────────┐
-              │ 🗄️ DB    │ │ 📧 Email │ │ 📅 Calendar  │
+              │   DB    │ │   Email │ │   Calendar  │
               │ SQLite/  │ │ Gmail    │ │ Google Cal   │
               │ Postgres │ │ API      │ │ API          │
               └──────────┘ └──────────┘ └──────────────┘

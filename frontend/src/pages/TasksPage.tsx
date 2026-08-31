@@ -9,9 +9,26 @@ interface Task {
   title: string;
   description: string | null;
   due_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
   is_completed: boolean;
   user_id: number | null;
 }
+
+const formatForDatetimeInput = (isoStr: string | null) => {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  if (isNaN(d.getTime())) return '';
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+const formatDisplayTime = (isoStr: string | null) => {
+  if (!isoStr) return null;
+  const d = new Date(isoStr);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+};
 
 const TasksPage = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -19,7 +36,13 @@ const TasksPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteTaskId, setDeleteTaskId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ title: '', description: '', due_date: '' });
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    due_date: '',
+    start_time: '',
+    end_time: ''
+  });
 
   useEffect(() => {
     fetchTasks();
@@ -44,6 +67,8 @@ const TasksPage = () => {
         title: formData.title,
         description: formData.description || null,
         due_date: formData.due_date ? new Date(formData.due_date).toISOString() : null,
+        start_time: formData.start_time ? new Date(formData.start_time).toISOString() : null,
+        end_time: formData.end_time ? new Date(formData.end_time).toISOString() : null,
         is_completed: false
       };
       
@@ -58,9 +83,9 @@ const TasksPage = () => {
       handleCloseModal();
       fetchTasks();
       toast.success(editingId ? 'Task updated successfully' : 'Task created successfully');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save task', err);
-      toast.error('Failed to save task');
+      toast.error(err.response?.data?.detail || 'Failed to save task');
     }
   };
 
@@ -70,29 +95,33 @@ const TasksPage = () => {
         title: task.title,
         description: task.description,
         due_date: task.due_date,
+        start_time: task.start_time,
+        end_time: task.end_time,
         is_completed: !task.is_completed
       });
       fetchTasks();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to update task', err);
-      toast.error('Failed to update task status');
+      toast.error(err.response?.data?.detail || 'Failed to update task status');
     }
   };
 
   const handleEdit = (task: Task) => {
     setEditingId(task.id);
-    let formattedDate = '';
+    let formattedDueDate = '';
     if (task.due_date) {
       const dateObj = new Date(task.due_date);
       if (!isNaN(dateObj.getTime())) {
-        formattedDate = dateObj.toISOString().split('T')[0];
+        formattedDueDate = dateObj.toISOString().split('T')[0];
       }
     }
     
     setFormData({
       title: task.title,
       description: task.description || '',
-      due_date: formattedDate
+      due_date: formattedDueDate,
+      start_time: formatForDatetimeInput(task.start_time),
+      end_time: formatForDatetimeInput(task.end_time)
     });
     setIsModalOpen(true);
   };
@@ -103,9 +132,9 @@ const TasksPage = () => {
       await api.delete(`/tasks/${deleteTaskId}`);
       fetchTasks();
       toast.success('Task deleted successfully');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to delete task', err);
-      toast.error('Failed to delete task');
+      toast.error(err.response?.data?.detail || 'Failed to delete task');
     } finally {
       setDeleteTaskId(null);
     }
@@ -114,7 +143,7 @@ const TasksPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingId(null);
-    setFormData({ title: '', description: '', due_date: '' });
+    setFormData({ title: '', description: '', due_date: '', start_time: '', end_time: '' });
   };
 
   if (loading) {
@@ -173,7 +202,15 @@ const TasksPage = () => {
                   </div>
                 )}
                 <div style={{ color: 'var(--subtle)', fontSize: 11, marginTop: 4, fontFamily: 'var(--font-mono)' }}>
-                  Due: {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
+                  {task.start_time && task.end_time ? (
+                    <span style={{ color: 'var(--accent3)' }}>
+                      🕒 {formatDisplayTime(task.start_time)} → {formatDisplayTime(task.end_time)}
+                    </span>
+                  ) : task.due_date ? (
+                    `Due: ${new Date(task.due_date).toLocaleDateString()}`
+                  ) : (
+                    'No schedule set'
+                  )}
                 </div>
               </div>
               
@@ -219,8 +256,30 @@ const TasksPage = () => {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="field">
+              <label className="label">From Time</label>
+              <input
+                type="datetime-local"
+                className="input"
+                value={formData.start_time}
+                onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label className="label">To Time</label>
+              <input
+                type="datetime-local"
+                className="input"
+                value={formData.end_time}
+                onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+              />
+            </div>
+          </div>
+
           <div className="field">
-            <label className="label">Due Date</label>
+            <label className="label">Due Date (Optional)</label>
             <input
               type="date"
               className="input"
@@ -228,6 +287,7 @@ const TasksPage = () => {
               onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
             />
           </div>
+
           <button type="submit" className="btn btn-primary" style={{ marginTop: 8, justifyContent: 'center' }}>
             {editingId ? "Update Task" : "Save Task"}
           </button>
