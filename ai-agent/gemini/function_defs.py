@@ -1,8 +1,8 @@
-import requests
-import os
 import json
+import os
+import requests
 from dotenv import load_dotenv
-
+from .email_service import draft_email_content, send_email_via_oauth
 # Load env from ai-agent/.env
 env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path=env_path)
@@ -158,5 +158,35 @@ def get_deals(status: str = None) -> str:
         return f"Failed to connect to backend API: {str(e)}"
 
 
+def send_smart_emails(emails: list[str], campaign_context: str) -> str:
+    """
+    Drafts and sends personalized emails to a list of recipients using Gmail.
+    Use this when the user wants to send an email or a campaign.
+
+    Args:
+        emails: A list of email addresses to send to.
+        campaign_context: The topic, instructions, or context for the email body.
+    """
+    results = []
+    success_count = 0
+    
+    for email in emails:
+        # 1. Draft the email using AI
+        draft = draft_email_content(email, campaign_context)
+        subject = draft.get("subject", "Hello from our CRM")
+        body = draft.get("body", campaign_context)
+        
+        # 2. Send via Gmail API OAuth
+        success, msg = send_email_via_oauth(email, subject, body)
+        if success:
+            success_count += 1
+            results.append(f"Successfully sent to {email} (Subject: {subject})")
+        else:
+            results.append(f"Failed to send to {email}: {msg}")
+            
+    summary = f"Smart Email Campaign completed. {success_count}/{len(emails)} sent successfully.\nDetails:\n" + "\n".join(results)
+    return summary
+
+
 # List of tools to pass to Gemini
-crm_tools = [add_lead, get_leads, delete_lead, get_deals]
+crm_tools = [add_lead, get_leads, delete_lead, get_deals, send_smart_emails]
