@@ -172,3 +172,7 @@ captures/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Secrets and credentials
+*credentials.json
+*token.json
