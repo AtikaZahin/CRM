@@ -5,7 +5,7 @@ from typing import List
 from app.database.connection import get_db
 from app.models.deal import Deal
 from app.schemas.deal import DealCreate, DealResponse
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user, require_admin
 from app.models.user import User
 
 router = APIRouter(
@@ -19,7 +19,7 @@ def read_deals(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), c
     return deals
 
 @router.post("/", response_model=DealResponse, status_code=status.HTTP_201_CREATED)
-def create_deal(deal: DealCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_deal(deal: DealCreate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     db_deal = Deal(**deal.model_dump(), owner_id=current_user.id)
     db.add(db_deal)
     db.commit()
@@ -34,7 +34,7 @@ def read_deal(deal_id: int, db: Session = Depends(get_db), current_user: User = 
     return db_deal
 
 @router.put("/{deal_id}", response_model=DealResponse)
-def update_deal(deal_id: int, deal: DealCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def update_deal(deal_id: int, deal: DealCreate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     db_deal = db.query(Deal).filter(Deal.id == deal_id).first()
     if db_deal is None:
         raise HTTPException(status_code=404, detail="Deal not found")
@@ -47,7 +47,7 @@ def update_deal(deal_id: int, deal: DealCreate, db: Session = Depends(get_db), c
     return db_deal
 
 @router.delete("/{deal_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_deal(deal_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def delete_deal(deal_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     db_deal = db.query(Deal).filter(Deal.id == deal_id).first()
     if db_deal is None:
         raise HTTPException(status_code=404, detail="Deal not found")

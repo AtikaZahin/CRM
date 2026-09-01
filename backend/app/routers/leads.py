@@ -6,7 +6,7 @@ from app.database.connection import get_db
 from app.models.lead import Lead
 from app.models.deal import Deal
 from app.schemas.lead import LeadCreate, LeadResponse
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user, require_manager_or_admin, require_admin
 from app.models.user import User
 
 # Internal API key for AI agent to call these endpoints without OAuth2
@@ -38,7 +38,7 @@ def read_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), c
     return leads
 
 @router.post("/", response_model=LeadResponse, status_code=status.HTTP_201_CREATED)
-def create_lead(lead: LeadCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_lead(lead: LeadCreate, db: Session = Depends(get_db), current_user: User = Depends(require_manager_or_admin)):
     if lead.email:
         existing_lead = db.query(Lead).filter(
             Lead.email.ilike(lead.email.strip())
@@ -107,7 +107,7 @@ def read_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = 
     return db_lead
 
 @router.put("/{lead_id}", response_model=LeadResponse)
-def update_lead(lead_id: int, lead: LeadCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def update_lead(lead_id: int, lead: LeadCreate, db: Session = Depends(get_db), current_user: User = Depends(require_manager_or_admin)):
     db_lead = db.query(Lead).filter(Lead.id == lead_id).first()
     if db_lead is None:
         raise HTTPException(status_code=404, detail="Lead not found")
@@ -131,7 +131,7 @@ def update_lead(lead_id: int, lead: LeadCreate, db: Session = Depends(get_db), c
     return db_lead
 
 @router.delete("/{lead_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def delete_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     db_lead = db.query(Lead).filter(Lead.id == lead_id).first()
     if db_lead is None:
         raise HTTPException(status_code=404, detail="Lead not found")

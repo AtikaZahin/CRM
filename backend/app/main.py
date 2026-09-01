@@ -28,6 +28,7 @@ try:
     with engine.connect() as conn:
         conn.execute(text("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS start_time TIMESTAMP WITH TIME ZONE;"))
         conn.execute(text("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS end_time TIMESTAMP WITH TIME ZONE;"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR DEFAULT 'user';"))
         conn.commit()
 except Exception as e:
     print("Column creation notice:", e)
@@ -36,7 +37,7 @@ except Exception as e:
 def read_root():
     return {"message": "Welcome to the Capstone API"}
 
-from app.routers import auth, leads, contacts, deals, tasks, ai, oauth
+from app.routers import auth, leads, contacts, deals, tasks, ai, oauth, users
 app.include_router(auth.router)
 app.include_router(leads.router)
 app.include_router(contacts.router)
@@ -44,3 +45,4 @@ app.include_router(deals.router)
 app.include_router(tasks.router)
 app.include_router(ai.router)
 app.include_router(oauth.router)
+app.include_router(users.router)

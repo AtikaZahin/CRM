@@ -7,9 +7,12 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
+    name = Column(String, nullable=True)
+    username = Column(String, unique=True, index=True, nullable=True)
+    email = Column(String, unique=True, index=True, nullable=True)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
+    role = Column(String, default="SALESPERSON")
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     leads = relationship("Lead", back_populates="owner")

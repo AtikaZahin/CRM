@@ -5,7 +5,7 @@ from typing import List
 from app.database.connection import get_db
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskResponse
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user, require_manager_or_admin, require_admin
 from app.models.user import User
 
 router = APIRouter(
@@ -55,7 +55,7 @@ def read_tasks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), c
     return tasks
 
 @router.post("/", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
-def create_task(task: TaskCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_task(task: TaskCreate, db: Session = Depends(get_db), current_user: User = Depends(require_manager_or_admin)):
     check_time_conflict(db, current_user.id, task.start_time, task.end_time)
     db_task = Task(**task.model_dump(), user_id=current_user.id)
     db.add(db_task)
@@ -71,7 +71,7 @@ def read_task(task_id: int, db: Session = Depends(get_db), current_user: User = 
     return db_task
 
 @router.put("/{task_id}", response_model=TaskResponse)
-def update_task(task_id: int, task: TaskCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def update_task(task_id: int, task: TaskCreate, db: Session = Depends(get_db), current_user: User = Depends(require_manager_or_admin)):
     db_task = db.query(Task).filter(Task.id == task_id).first()
     if db_task is None:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -86,7 +86,7 @@ def update_task(task_id: int, task: TaskCreate, db: Session = Depends(get_db), c
     return db_task
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def delete_task(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     db_task = db.query(Task).filter(Task.id == task_id).first()
     if db_task is None:
         raise HTTPException(status_code=404, detail="Task not found")
