@@ -47,9 +47,15 @@ const Navbar = () => {
               fontSize: '12px',
               color: 'var(--muted)',
               fontFamily: 'var(--font-mono)',
-              letterSpacing: '0.02em'
+              letterSpacing: '0.02em',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
             }}>
-              {user.name || user.email}
+              {user.email}
+              <span className={`badge ${user.role === 'Admin' ? 'badge-blue' : user.role === 'Manager' ? 'badge-purple' : 'badge-gray'}`} style={{ fontSize: '10px' }}>
+                {user.role}
+              </span>
             </span>
             <button
               onClick={logout}

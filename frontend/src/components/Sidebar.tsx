@@ -1,7 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const links = [
+const baseLinks = [
   { name: 'Dashboard', path: '/',        icon: '◈' },
   { name: 'Leads',     path: '/leads',   icon: '◎' },
   { name: 'Contacts',  path: '/contacts',icon: '◉' },
@@ -10,6 +11,13 @@ const links = [
 ];
 
 const Sidebar = () => {
+  const { user } = useAuth();
+
+  const links = [...baseLinks];
+  if (user && user.role === 'ADMIN') {
+    links.push({ name: 'Users', path: '/users', icon: '👤' });
+  }
+
   return (
     <aside className="sidebar">
       <span className="sidebar-section-label">Navigation</span>

@@ -4,6 +4,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import LeadCard from '../components/LeadCard';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 interface Lead {
   id: number;
@@ -11,19 +12,44 @@ interface Lead {
   company: string;
   email: string;
   status: string;
+  owner_id?: number | null;
+}
+
+interface UserOption {
+  id: number;
+  email: string;
+  role: string;
 }
 
 const LeadsPage = () => {
+  const { user: currentUser } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteLeadId, setDeleteLeadId] = useState<number | null>(null);
   const [editingLeadId, setEditingLeadId] = useState<number | null>(null);
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [formData, setFormData] = useState({ name: '', company: '', email: '', status: 'New' });
+  const [usersList, setUsersList] = useState<UserOption[]>([]);
+  const [formData, setFormData] = useState({ name: '', company: '', email: '', status: 'New', owner_id: '' });
   const [loading, setLoading] = useState(true);
+
+  const canManageAssignment = currentUser?.role === 'ADMIN' || currentUser?.role === 'MANAGER';
+  const canWrite = currentUser?.role === 'ADMIN' || currentUser?.role === 'MANAGER';
+  const canDelete = currentUser?.role === 'ADMIN';
 
   useEffect(() => {
     fetchLeads();
-  }, []);
+    if (canManageAssignment) {
+      fetchUsers();
+    }
+  }, [currentUser]);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get('/users/');
+      setUsersList(res.data);
+    } catch (err) {
+      console.error('Failed to fetch users list', err);
+    }
+  };
 
   const fetchLeads = async () => {
     try {
@@ -40,14 +66,24 @@ const LeadsPage = () => {
   const handleSaveLead = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload: any = {
+        name: formData.name,
+        company: formData.company,
+        email: formData.email,
+        status: formData.status
+      };
+      if (canManageAssignment && formData.owner_id) {
+        payload.owner_id = parseInt(formData.owner_id);
+      }
+
       if (editingLeadId) {
-        await api.put(`/leads/${editingLeadId}`, formData);
+        await api.put(`/leads/${editingLeadId}`, payload);
       } else {
-        await api.post('/leads/', formData);
+        await api.post('/leads/', payload);
       }
       setIsModalOpen(false);
       setEditingLeadId(null);
-      setFormData({ name: '', company: '', email: '', status: 'New' });
+      setFormData({ name: '', company: '', email: '', status: 'New', owner_id: '' });
       fetchLeads();
       toast.success(editingLeadId ? 'Lead updated successfully' : 'Lead created successfully');
     } catch (err: any) {
@@ -72,13 +108,19 @@ const LeadsPage = () => {
 
   const openAddModal = () => {
     setEditingLeadId(null);
-    setFormData({ name: '', company: '', email: '', status: 'New' });
+    setFormData({ name: '', company: '', email: '', status: 'New', owner_id: currentUser?.id ? currentUser.id.toString() : '' });
     setIsModalOpen(true);
   };
 
   const openEditModal = (lead: Lead) => {
     setEditingLeadId(lead.id);
-    setFormData({ name: lead.name, company: lead.company, email: lead.email, status: lead.status });
+    setFormData({
+      name: lead.name,
+      company: lead.company,
+      email: lead.email,
+      status: lead.status,
+      owner_id: lead.owner_id ? lead.owner_id.toString() : ''
+    });
     setIsModalOpen(true);
   };
 
@@ -100,9 +142,11 @@ const LeadsPage = () => {
           <p className="section-label" style={{ marginBottom: 4 }}>Prospects</p>
           <h1 className="page-title">Leads</h1>
         </div>
-        <button onClick={openAddModal} className="btn btn-primary">
-          + Add Lead
-        </button>
+        {canWrite && (
+          <button onClick={openAddModal} className="btn btn-primary">
+            + Add Lead
+          </button>
+        )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
@@ -113,8 +157,8 @@ const LeadsPage = () => {
             company={lead.company}
             email={lead.email}
             status={lead.status}
-            onEdit={() => openEditModal(lead)}
-            onDelete={() => setDeleteLeadId(lead.id)}
+            onEdit={canWrite ? () => openEditModal(lead) : undefined}
+            onDelete={canDelete ? () => setDeleteLeadId(lead.id) : undefined}
           />
         ))}
       </div>
@@ -164,6 +208,25 @@ const LeadsPage = () => {
               <option value="Qualified">Qualified</option>
             </select>
           </div>
+
+          {canManageAssignment && (
+            <div className="field">
+              <label className="label">Assign To Owner</label>
+              <select
+                className="input"
+                value={formData.owner_id}
+                onChange={(e) => setFormData({ ...formData, owner_id: e.target.value })}
+              >
+                <option value="">Unassigned</option>
+                {usersList.map(u => (
+                  <option key={u.id} value={u.id}>
+                    {u.email} ({u.role})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <button type="submit" className="btn btn-primary" style={{ marginTop: 8, justifyContent: 'center' }}>
             {editingLeadId ? "Update Lead" : "Save Lead"}
           </button>

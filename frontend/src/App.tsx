@@ -11,6 +11,8 @@ import ContactsPage from './pages/ContactsPage';
 import DealsPage from './pages/DealsPage';
 import TasksPage from './pages/TasksPage';
 import RegisterPage from './pages/RegisterPage';
+import UsersPage from './pages/UsersPage';
+import RoleSelectorPage from './pages/RoleSelectorPage';
 
 function App() {
   return (
@@ -34,8 +36,14 @@ function App() {
             }}
           />
           <Routes>
-            <Route path="/login"    element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            {/* Role selector landing */}
+            <Route path="/login"          element={<RoleSelectorPage />} />
+            {/* Role-specific login portals */}
+            <Route path="/login/:role"    element={<LoginPage />} />
+            {/* Salesperson-only registration */}
+            <Route path="/register/salesperson" element={<RegisterPage />} />
+            {/* Legacy /register → role selector */}
+            <Route path="/register"      element={<Navigate to="/login" replace />} />
 
             <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
               <Route path="/"        element={<DashboardPage />} />
@@ -43,6 +51,7 @@ function App() {
               <Route path="/contacts"element={<ContactsPage />} />
               <Route path="/deals"   element={<DealsPage />} />
               <Route path="/tasks"   element={<TasksPage />} />
+              <Route path="/users"   element={<UsersPage />} />
               <Route path="*"        element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

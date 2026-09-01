@@ -1,10 +1,37 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { api } from '../services/api';
 
+type Role = 'salesperson' | 'manager' | 'admin';
+
+const ROLE_META: Record<Role, { label: string; badge: string; accentHex: string; icon: string }> = {
+  salesperson: {
+    label: 'Salesperson',
+    badge: 'Standard Access',
+    accentHex: '#4a5a35',
+    icon: '👤',
+  },
+  manager: {
+    label: 'Manager',
+    badge: 'Team Access',
+    accentHex: '#a3672f',
+    icon: '📊',
+  },
+  admin: {
+    label: 'Admin',
+    badge: 'Full Access',
+    accentHex: '#7a3b3b',
+    icon: '⚙️',
+  },
+};
+
 const LoginPage = () => {
+  const { role: roleParam } = useParams<{ role: string }>();
+  const role: Role = (roleParam as Role) || 'salesperson';
+  const meta = ROLE_META[role] ?? ROLE_META['salesperson'];
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -26,7 +53,7 @@ const LoginPage = () => {
       });
 
       const { access_token } = response.data;
-      login(access_token, { email });
+      await login(access_token);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Login failed');
     } finally {
@@ -36,7 +63,7 @@ const LoginPage = () => {
 
   return (
     <div className="auth-page">
-      {/* Minimal auth nav */}
+      {/* Nav */}
       <div className="auth-nav">
         <div className="nav-logo">
           <span className="nav-logo-dot" />
@@ -51,45 +78,70 @@ const LoginPage = () => {
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          <Link to="/register" className="btn btn-outline btn-sm">
-            Create account
+          {/* Only User portal shows a "Create account" link in nav */}
+          {role === 'salesperson' && (
+            <Link to="/register/salesperson" className="btn btn-outline btn-sm">
+              Create account
+            </Link>
+          )}
+          <Link to="/login" className="btn btn-outline btn-sm">
+            ← Portals
           </Link>
         </div>
       </div>
 
       {/* Card */}
       <div className="auth-body">
-        <div className="auth-card">
-          <p className="section-label" style={{ marginBottom: 16 }}>Welcome back</p>
-          <h2 className="auth-title">Sign in</h2>
-          <p className="auth-subtitle">Continue where you left off</p>
+        <div className="auth-card" style={{ maxWidth: 440 }}>
+          {/* Role badge */}
+          <div className="row gap-8" style={{ marginBottom: 16 }}>
+            <span style={{ fontSize: 20 }}>{meta.icon}</span>
+            <span
+              style={{
+                fontSize: 9,
+                fontFamily: 'var(--font-mono)',
+                fontWeight: 600,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: meta.accentHex,
+                background: `${meta.accentHex}18`,
+                border: `1px solid ${meta.accentHex}40`,
+                padding: '4px 10px',
+              }}
+            >
+              {meta.badge}
+            </span>
+          </div>
+
+          <h2 className="auth-title">{meta.label} Portal</h2>
+          <p className="auth-subtitle">Sign in to continue</p>
 
           {error && (
-            <div style={{
-              marginBottom: 16,
-              padding: '9px 14px',
-              background: 'var(--ember-light)',
-              border: '1px solid rgba(122,59,59,0.2)',
-              borderRadius: 'var(--r)',
-              fontSize: 12,
-              color: 'var(--ember)',
-              fontFamily: 'var(--font-mono)',
-            }}>
+            <div
+              style={{
+                marginBottom: 16,
+                padding: '9px 14px',
+                background: 'var(--ember-light)',
+                border: '1px solid rgba(122,59,59,0.2)',
+                borderRadius: 'var(--r)',
+                fontSize: 12,
+                color: 'var(--ember)',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
               {error}
             </div>
           )}
 
-          <form
-            onSubmit={handleSubmit}
-            className="stack gap-12"
-            style={{ marginBottom: 20 }}
-          >
+          <form onSubmit={handleSubmit} className="stack gap-12" style={{ marginBottom: 20 }}>
             <div className="field">
-              <label className="label" htmlFor="login-email">Email</label>
+              <label className="label" htmlFor={`login-email-${role}`}>
+                Username / Email
+              </label>
               <input
-                id="login-email"
-                type="email"
-                placeholder="you@email.com"
+                id={`login-email-${role}`}
+                type="text"
+                placeholder="Enter your credentials"
                 className="input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -98,9 +150,11 @@ const LoginPage = () => {
             </div>
 
             <div className="field">
-              <label className="label" htmlFor="login-password">Password</label>
+              <label className="label" htmlFor={`login-password-${role}`}>
+                Password
+              </label>
               <input
-                id="login-password"
+                id={`login-password-${role}`}
                 type="password"
                 placeholder="••••••••"
                 className="input"
@@ -114,18 +168,27 @@ const LoginPage = () => {
               type="submit"
               className="btn btn-primary"
               disabled={loading}
-              style={{ width: '100%', justifyContent: 'center', marginTop: 4 }}
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                marginTop: 4,
+                background: meta.accentHex,
+                borderColor: meta.accentHex,
+              }}
             >
-              {loading ? 'Signing in…' : 'Sign In'}
+              {loading ? 'Signing in…' : `Sign In as ${meta.label}`}
             </button>
           </form>
 
-          <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--muted)' }}>
-            No account?{' '}
-            <Link to="/register" style={{ color: 'var(--accent3)', fontWeight: 500 }}>
-              Create one
-            </Link>
-          </p>
+          {/* Sign-up link — User portal only */}
+          {role === 'salesperson' && (
+            <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--muted)' }}>
+              No account?{' '}
+              <Link to="/register/salesperson" style={{ color: meta.accentHex, fontWeight: 500 }}>
+                Create one
+              </Link>
+            </p>
+          )}
         </div>
       </div>
     </div>

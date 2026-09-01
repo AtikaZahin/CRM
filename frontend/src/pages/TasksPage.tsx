@@ -3,6 +3,7 @@ import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 interface Task {
   id: number;
@@ -13,6 +14,12 @@ interface Task {
   end_time: string | null;
   is_completed: boolean;
   user_id: number | null;
+}
+
+interface UserOption {
+  id: number;
+  email: string;
+  role: string;
 }
 
 const formatForDatetimeInput = (isoStr: string | null) => {
@@ -31,7 +38,9 @@ const formatDisplayTime = (isoStr: string | null) => {
 };
 
 const TasksPage = () => {
+  const { user: currentUser } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [usersList, setUsersList] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteTaskId, setDeleteTaskId] = useState<number | null>(null);
@@ -41,12 +50,27 @@ const TasksPage = () => {
     description: '',
     due_date: '',
     start_time: '',
-    end_time: ''
+    end_time: '',
+    user_id: ''
   });
+
+  const canManageAssignment = currentUser?.role === 'Admin' || currentUser?.role === 'Manager';
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+    if (canManageAssignment) {
+      fetchUsers();
+    }
+  }, [currentUser]);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get('/users/');
+      setUsersList(res.data);
+    } catch (err) {
+      console.error('Failed to fetch users list', err);
+    }
+  };
 
   const fetchTasks = async () => {
     try {
@@ -63,7 +87,7 @@ const TasksPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload = {
+      const payload: any = {
         title: formData.title,
         description: formData.description || null,
         due_date: formData.due_date ? new Date(formData.due_date).toISOString() : null,
@@ -71,6 +95,9 @@ const TasksPage = () => {
         end_time: formData.end_time ? new Date(formData.end_time).toISOString() : null,
         is_completed: false
       };
+      if (canManageAssignment && formData.user_id) {
+        payload.user_id = parseInt(formData.user_id);
+      }
       
       if (editingId) {
         const existingTask = tasks.find(t => t.id === editingId);
@@ -121,7 +148,8 @@ const TasksPage = () => {
       description: task.description || '',
       due_date: formattedDueDate,
       start_time: formatForDatetimeInput(task.start_time),
-      end_time: formatForDatetimeInput(task.end_time)
+      end_time: formatForDatetimeInput(task.end_time),
+      user_id: task.user_id ? task.user_id.toString() : ''
     });
     setIsModalOpen(true);
   };
@@ -143,7 +171,7 @@ const TasksPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingId(null);
-    setFormData({ title: '', description: '', due_date: '', start_time: '', end_time: '' });
+    setFormData({ title: '', description: '', due_date: '', start_time: '', end_time: '', user_id: '' });
   };
 
   if (loading) {
@@ -287,6 +315,24 @@ const TasksPage = () => {
               onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
             />
           </div>
+
+          {canManageAssignment && (
+            <div className="field">
+              <label className="label">Assign To User</label>
+              <select
+                className="input"
+                value={formData.user_id}
+                onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
+              >
+                <option value="">Unassigned</option>
+                {usersList.map(u => (
+                  <option key={u.id} value={u.id}>
+                    {u.email} ({u.role})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <button type="submit" className="btn btn-primary" style={{ marginTop: 8, justifyContent: 'center' }}>
             {editingId ? "Update Task" : "Save Task"}

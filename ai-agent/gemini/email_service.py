@@ -4,7 +4,6 @@ import json
 import base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import google.generativeai as genai
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
@@ -14,20 +13,25 @@ def draft_email_content(recipient_email: str, context: str) -> dict:
     Uses Gemini to draft a personalized email subject and body.
     Returns a dictionary with 'subject' and 'body'.
     """
-    model = genai.GenerativeModel(
-        model_name="gemini-3.5-flash",
-        system_instruction=(
-            "You are an expert sales and marketing copywriter. "
-            "Write an email for the given recipient based on the context provided. "
-            "Respond ONLY with a valid JSON object containing exactly two keys: "
-            "'subject' (the email subject line) and 'body' (the email body text)."
-        )
+    from google import genai as google_genai
+    from dotenv import load_dotenv
+    env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+    load_dotenv(dotenv_path=env_path)
+    _client = google_genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    
+    response = _client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=f"Recipient Email: {recipient_email}\nContext/Topic: {context}\n\nPlease draft the email.",
+        config={
+            "system_instruction": (
+                "You are an expert sales and marketing copywriter. "
+                "Write an email for the given recipient based on the context provided. "
+                "Respond ONLY with a valid JSON object containing exactly two keys: "
+                "'subject' (the email subject line) and 'body' (the email body text)."
+            )
+        }
     )
-    
-    prompt = f"Recipient Email: {recipient_email}\nContext/Topic: {context}\n\nPlease draft the email."
-    
     try:
-        response = model.generate_content(prompt)
         text = response.text.strip()
         
         # Try to parse the JSON output (in case it includes markdown backticks)

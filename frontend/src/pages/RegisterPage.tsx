@@ -16,9 +16,9 @@ const RegisterPage = () => {
     e.preventDefault();
     setError('');
     try {
-      await api.post('/register', { email, password });
+      await api.post('/register', { email, password, name });
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate('/login/salesperson'), 2000);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Registration failed');
     }
@@ -42,7 +42,7 @@ const RegisterPage = () => {
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
           <Link to="/login" className="btn btn-outline btn-sm">
-            Sign in
+            ← Portals
           </Link>
         </div>
       </div>
@@ -139,7 +139,7 @@ const RegisterPage = () => {
 
           <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--muted)' }}>
             Already have an account?{' '}
-            <Link to="/login" style={{ color: 'var(--accent3)', fontWeight: 500 }}>
+            <Link to="/login/salesperson" style={{ color: 'var(--accent2)', fontWeight: 500 }}>
               Sign in
             </Link>
           </p>

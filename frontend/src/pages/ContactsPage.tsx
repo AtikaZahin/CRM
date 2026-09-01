@@ -3,6 +3,7 @@ import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 interface Contact {
   id: number;
@@ -11,10 +12,19 @@ interface Contact {
   email: string | null;
   phone: string | null;
   lead_id: number | null;
+  owner_id?: number | null;
+}
+
+interface UserOption {
+  id: number;
+  email: string;
+  role: string;
 }
 
 const ContactsPage = () => {
+  const { user: currentUser } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [usersList, setUsersList] = useState<UserOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteContactId, setDeleteContactId] = useState<number | null>(null);
@@ -24,12 +34,27 @@ const ContactsPage = () => {
     last_name: '',
     email: '',
     phone: '',
-    lead_id: ''
+    lead_id: '',
+    owner_id: ''
   });
+
+  const canManageAssignment = currentUser?.role === 'Admin' || currentUser?.role === 'Manager';
 
   useEffect(() => {
     fetchContacts();
-  }, []);
+    if (canManageAssignment) {
+      fetchUsers();
+    }
+  }, [currentUser]);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get('/users/');
+      setUsersList(res.data);
+    } catch (err) {
+      console.error('Failed to fetch users list', err);
+    }
+  };
 
   const fetchContacts = async () => {
     try {
@@ -46,13 +71,16 @@ const ContactsPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload = {
+      const payload: any = {
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email || null,
         phone: formData.phone || null,
         lead_id: formData.lead_id ? parseInt(formData.lead_id) : null
       };
+      if (canManageAssignment && formData.owner_id) {
+        payload.owner_id = parseInt(formData.owner_id);
+      }
       
       if (editingId) {
         await api.put(`/contacts/${editingId}`, payload);
@@ -76,7 +104,8 @@ const ContactsPage = () => {
       last_name: contact.last_name,
       email: contact.email || '',
       phone: contact.phone || '',
-      lead_id: contact.lead_id ? contact.lead_id.toString() : ''
+      lead_id: contact.lead_id ? contact.lead_id.toString() : '',
+      owner_id: contact.owner_id ? contact.owner_id.toString() : ''
     });
     setIsModalOpen(true);
   };
@@ -98,7 +127,7 @@ const ContactsPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingId(null);
-    setFormData({ first_name: '', last_name: '', email: '', phone: '', lead_id: '' });
+    setFormData({ first_name: '', last_name: '', email: '', phone: '', lead_id: '', owner_id: '' });
   };
 
   if (loading) {
@@ -237,6 +266,25 @@ const ContactsPage = () => {
               onChange={(e) => setFormData({ ...formData, lead_id: e.target.value })}
             />
           </div>
+
+          {canManageAssignment && (
+            <div className="field">
+              <label className="label">Assign To Owner</label>
+              <select
+                className="input"
+                value={formData.owner_id}
+                onChange={(e) => setFormData({ ...formData, owner_id: e.target.value })}
+              >
+                <option value="">Unassigned</option>
+                {usersList.map(u => (
+                  <option key={u.id} value={u.id}>
+                    {u.email} ({u.role})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <button type="submit" className="btn btn-primary" style={{ marginTop: 8, justifyContent: 'center' }}>
             {editingId ? "Update Contact" : "Save Contact"}
           </button>

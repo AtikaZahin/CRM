@@ -1,34 +1,67 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 
+import { api } from '../services/api';
+
+interface UserProfile {
+  id: number;
+  name?: string;
+  username?: string;
+  email?: string;
+  role: string;
+  is_active: boolean;
+}
+
 interface AuthContextType {
-  user: any;
+  user: UserProfile | null;
   token: string | null;
-  login: (token: string, userData: any) => void;
+  login: (token: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(!!localStorage.getItem('token'));
   const navigate = useNavigate();
+
+  const fetchProfile = async (authToken?: string) => {
+    try {
+      const headers = authToken
+        ? { Authorization: `Bearer ${authToken}` }
+        : undefined;
+      const res = await api.get('/auth/me', { headers });
+      setUser(res.data);
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
+      // Only logout if we had a token — don't loop
+      localStorage.removeItem('token');
+      setToken(null);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (token) {
-      // Mock fetching user data
-      setUser({ name: 'Admin User', role: 'admin' });
+      fetchProfile();
     } else {
       setUser(null);
+      setIsLoading(false);
     }
   }, [token]);
 
-  const login = (newToken: string, userData: any) => {
+  const login = async (newToken: string) => {
     localStorage.setItem('token', newToken);
+    setIsLoading(true);
     setToken(newToken);
-    setUser(userData);
+    // fetchProfile will be triggered by the useEffect above
+    // Navigate immediately — ProtectedRoute will show spinner until profile loads
     navigate('/');
   };
 
@@ -40,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token && !!user, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
@@ -55,8 +88,17 @@ export const useAuth = () => {
 };
 
 export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const { isAuthenticated } = useAuth();
-  
+  const { isAuthenticated, isLoading, token } = useAuth();
+
+  // Still loading the user profile — show spinner instead of redirecting
+  if (isLoading || (token && !isAuthenticated)) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <div className="spinner" />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
