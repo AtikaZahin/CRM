@@ -114,5 +114,23 @@ def delete_lead(id: int) -> str:
     except Exception as e:
         return f"Failed to connect to backend API: {str(e)}"
 
+def send_email(recipient_email: str, context: str) -> str:
+    """
+    Drafts and sends an email to the specified recipient based on the provided context.
+    
+    Args:
+        recipient_email: The email address of the person to send the email to.
+        context: What the email should be about (e.g., 'follow up on our meeting', 'introduction').
+    """
+    from .email_service import draft_email_content, send_email_via_oauth
+    
+    draft = draft_email_content(recipient_email, context)
+    success, message = send_email_via_oauth(recipient_email, draft["subject"], draft["body"])
+    
+    if success:
+        return f"Email sent successfully. Subject: '{draft['subject']}'. Body snippet: '{draft['body'][:50]}...'"
+    else:
+        return f"Failed to send email: {message}"
+
 # List of tools to pass to Gemini
-crm_tools = [add_lead, get_deals, delete_lead]
+crm_tools = [add_lead, get_deals, delete_lead, send_email]

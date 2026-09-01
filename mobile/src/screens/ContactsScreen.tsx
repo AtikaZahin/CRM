@@ -5,13 +5,18 @@ import { colors } from '../theme/colors';
 import { GlassCard } from '../components/GlassCard';
 import { api } from '../services/api';
 
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+
 export const ContactsScreen = () => {
   const [contacts, setContacts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchContacts();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchContacts();
+    }, [])
+  );
 
   const fetchContacts = async () => {
     try {

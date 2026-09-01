@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[ContactResponse])
-def read_contacts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def read_contacts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     contacts = db.query(Contact).offset(skip).limit(limit).all()
     return contacts
 

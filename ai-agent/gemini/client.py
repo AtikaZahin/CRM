@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 from .function_defs import crm_tools
 
 # Load environment variables (API Key)
-load_dotenv()
+dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+load_dotenv(dotenv_path)
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key or api_key == "your_api_key_here":
@@ -30,4 +31,4 @@ def get_chat_session():
     # enable_automatic_function_calling=True tells Gemini to automatically 
     # run the python function when it decides a tool is needed, 
     # and then feed the result back into the model to generate a final answer.
-    return model.start_chat(enable_automatic_function_calling=False)
+    return model.start_chat(enable_automatic_function_calling=True)

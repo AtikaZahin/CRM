@@ -1,0 +1,3 @@
+@echo off
+echo Starting FastAPI Backend on all network interfaces...
+uvicorn app.main:app --host 0.0.0.0 --reload
