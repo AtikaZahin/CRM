@@ -21,6 +21,28 @@ try:
 except Exception as e:
     print(f"Warning: Failed to initialize Gemini chat session on startup: {e}")
 
+def extract_text(response) -> str:
+    try:
+        if response.text:
+            return response.text
+    except Exception:
+        pass
+
+    reply_text = ""
+    candidates = getattr(response, 'candidates', [])
+    if candidates:
+        for candidate in candidates:
+            content = getattr(candidate, 'content', None)
+            if content:
+                parts = getattr(content, 'parts', None)
+                if parts: # Checks if parts is not None and not empty
+                    for part in parts:
+                        text = getattr(part, 'text', "")
+                        if text:
+                            reply_text += text + " "
+    
+    return reply_text.strip()
+
 @router.post("/chat", response_model=AIChatResponse)
 def chat_with_ai(request: AIChatRequest):
     """
@@ -32,23 +54,13 @@ def chat_with_ai(request: AIChatRequest):
             chat = create_fresh_chat()
 
         response = chat.send_message(request.message)
-        
-        # Safely extract text content
-        reply_text = ""
-        try:
-            reply_text = response.text
-        except Exception:
-            if hasattr(response, 'candidates') and response.candidates:
-                for candidate in response.candidates:
-                    for part in candidate.content.parts:
-                        if hasattr(part, 'text') and part.text:
-                            reply_text += part.text + " "
+        reply_text = extract_text(response)
         
         if not reply_text:
             reply_text = "I performed the requested action."
 
         return AIChatResponse(
-            response=reply_text.strip(),
+            response=reply_text,
             actions_taken=[]
         )
     except Exception as e:
@@ -56,11 +68,11 @@ def chat_with_ai(request: AIChatRequest):
         try:
             chat = create_fresh_chat()
             response = chat.send_message(request.message)
-            reply_text = ""
-            try:
-                reply_text = response.text
-            except Exception:
+            reply_text = extract_text(response)
+            
+            if not reply_text:
                 reply_text = "Action completed."
+                
             return AIChatResponse(
                 response=reply_text,
                 actions_taken=[]
