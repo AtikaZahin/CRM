@@ -8,7 +8,12 @@ type Role = 'salesperson' | 'manager' | 'admin';
 
 const ROLE_META: Record<Role, { label: string; badge: string; accentHex: string; icon: string }> = {
   salesperson: {
-
+    label: 'Salesperson',
+    badge: 'Standard Access',
+    accentHex: '#4a5a35',
+    icon: '👤',
+  },
+  manager: {
     label: 'Manager',
     badge: 'Team Access',
     accentHex: '#a3672f',
@@ -20,13 +25,6 @@ const ROLE_META: Record<Role, { label: string; badge: string; accentHex: string;
     accentHex: '#7a3b3b',
     icon: '⚙️',
   },
-  salesperson: {
-    label: 'Salesperson',
-    badge: 'Standard Access',
-    accentHex: '#4a5a35',
-    icon: '👤',
-  },
-  manager:
 };
 
 const LoginPage = () => {
