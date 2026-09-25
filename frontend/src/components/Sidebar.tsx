@@ -1,19 +1,20 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useStaffAuth } from '../context/StaffAuthContext';
 
 const baseLinks = [
-  { name: 'Dashboard', path: '/',        icon: '◈' },
-  { name: 'Deals',     path: '/deals',   icon: '◇' },
+  { name: 'Announcements',    path: '/staff/announcements', icon: '📢' },
+  { name: 'Dashboard',        path: '/staff/dashboard',     icon: '◈' },
+  { name: 'Employee Details', path: '/staff/users',         icon: '👤' },
+  { name: 'Support',          path: '/staff/support',       icon: '🎫' },
+  { name: 'Deals',            path: '/staff/deals',         icon: '◇' },
+  { name: 'Customers',        path: '/staff/customers',     icon: '🛒' },
 ];
 
 const Sidebar = () => {
-  const { user } = useAuth();
+  const { user } = useStaffAuth();
 
   const links = [...baseLinks];
-  if (user && user.role === 'ADMIN') {
-    links.push({ name: 'Users', path: '/users', icon: '👤' });
-  }
 
   return (
     <aside className="sidebar">

@@ -3,7 +3,7 @@ import Modal from '../components/Modal';
 import DealPipelineBoard from '../components/DealPipelineBoard';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
+import { useStaffAuth } from '../context/StaffAuthContext';
 
 interface UserOption {
   id: number;
@@ -12,7 +12,7 @@ interface UserOption {
 }
 
 const DealsPage = () => {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = useStaffAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [usersList, setUsersList] = useState<UserOption[]>([]);
   const [formData, setFormData] = useState({ title: '', value: '', status: 'Open', contact_id: '', owner_id: '' });

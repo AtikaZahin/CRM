@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 
 import { api } from '../services/api';
 
-interface UserProfile {
+interface StaffProfile {
   id: number;
   name?: string;
   email?: string;
@@ -14,8 +14,8 @@ interface UserProfile {
   is_active: boolean;
 }
 
-interface AuthContextType {
-  user: UserProfile | null;
+interface StaffAuthContextType {
+  user: StaffProfile | null;
   token: string | null;
   login: (token: string) => Promise<void>;
   logout: () => void;
@@ -23,23 +23,21 @@ interface AuthContextType {
   isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const StaffAuthContext = createContext<StaffAuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const StaffAuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(localStorage.getItem('staff_token'));
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<StaffProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(!!localStorage.getItem('staff_token'));
   const navigate = useNavigate();
 
-  const fetchProfile = async (authToken?: string) => {
+  const fetchProfile = async (authToken: string) => {
     try {
-      const headers = authToken
-        ? { Authorization: `Bearer ${authToken}` }
-        : undefined;
+      const headers = { Authorization: `Bearer ${authToken}` };
       const res = await api.get('/staff/me', { headers });
       setUser(res.data);
     } catch (err) {
-      console.error('Failed to fetch user profile:', err);
+      console.error('Failed to fetch staff profile:', err);
       localStorage.removeItem('staff_token');
       setToken(null);
       setUser(null);
@@ -50,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (token) {
-      fetchProfile();
+      fetchProfile(token);
     } else {
       setUser(null);
       setIsLoading(false);
@@ -61,33 +59,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('staff_token', newToken);
     setIsLoading(true);
     setToken(newToken);
-    navigate('/');
+    navigate('/staff/dashboard');
   };
 
   const logout = () => {
     localStorage.removeItem('staff_token');
     setToken(null);
     setUser(null);
-    navigate('/login');
+    navigate('/staff/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token && !!user, isLoading }}>
+    <StaffAuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token && !!user, isLoading }}>
       {children}
-    </AuthContext.Provider>
+    </StaffAuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
+export const useStaffAuth = () => {
+  const context = useContext(StaffAuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useStaffAuth must be used within a StaffAuthProvider');
   }
   return context;
 };
 
-export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const { isAuthenticated, isLoading, token } = useAuth();
+export const ProtectedStaffRoute = ({ children }: { children: JSX.Element }) => {
+  const { isAuthenticated, isLoading, token } = useStaffAuth();
+  const location = useLocation();
 
   if (isLoading || (token && !isAuthenticated)) {
     return (
@@ -98,7 +97,7 @@ export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/staff/login" state={{ from: location }} replace />;
   }
   return children;
 };

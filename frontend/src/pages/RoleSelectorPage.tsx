@@ -4,31 +4,31 @@ import { useTheme } from '../context/ThemeContext';
 
 const roles = [
   {
-    key: 'salesperson',
-    label: 'Salesperson',
-    icon: '👤',
-    description: 'Access your leads, contacts, tasks and deals.',
-    badge: 'Standard Access',
-    accentHex: '#4a5a35',
-    path: '/login/salesperson',
-  },
-  {
-    key: 'manager',
-    label: 'Manager',
-    icon: '📊',
-    description: 'Oversee team performance and manage pipelines.',
-    badge: 'Team Access',
-    accentHex: '#a3672f',
-    path: '/login/manager',
-  },
-  {
     key: 'admin',
     label: 'Admin',
     icon: '⚙️',
-    description: 'Full system control — users, config and reporting.',
-    badge: 'Full Access',
+    description: 'System-wide control and configurations.',
+    badge: 'Staff Portal',
     accentHex: '#7a3b3b',
-    path: '/login/admin',
+    path: '/staff/login',
+  },
+  {
+    key: 'employee',
+    label: 'Employee',
+    icon: '👤',
+    description: 'Access your CRM dashboard and tickets.',
+    badge: 'Staff Portal',
+    accentHex: '#4a5a35',
+    path: '/staff/login',
+  },
+  {
+    key: 'customer',
+    label: 'Customer',
+    icon: '🛒',
+    description: 'View orders and manage support tickets.',
+    badge: 'Customer Portal',
+    accentHex: '#a3672f',
+    path: '/shop/login',
   },
 ];
 

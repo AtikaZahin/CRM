@@ -1,11 +1,11 @@
 import React from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useStaffAuth } from '../context/StaffAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useChat } from '../context/ChatContext';
 import { Link } from 'react-router-dom';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useStaffAuth();
   const { theme, toggleTheme } = useTheme();
   const { toggleDrawer } = useChat();
 

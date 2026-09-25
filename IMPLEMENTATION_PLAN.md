@@ -270,7 +270,7 @@ Done when:
 - Priya's token on `GET /staff/me` → 401.
 - Anita's token on `GET /customer/me` → 401.
 
-### [ ] Task 3.2 – Products and orders
+### [x] Task 3.2 – Products and orders
 
 What to do:
 
@@ -288,7 +288,7 @@ Done when:
 
 ## Phase 4 – Tickets and chat (the main feature)
 
-### [ ] Task 4.1 – Tickets and messages (REST)
+### [x] Task 4.1 – Tickets and messages (REST)
 
 What to do:
 
@@ -328,7 +328,7 @@ Done when (dry run):
 6. Ravi and Priya can post messages. Meena gets 404. Admin can read but posting fails.
 7. After Ravi resolves it, nobody can post.
 
-### [ ] Task 4.2 – Real-time chat with WebSocket
+### [x] Task 4.2 – Real-time chat with WebSocket
 
 Keep it simple: an in-memory connection manager, no Redis.
 
@@ -354,7 +354,7 @@ Done when:
 
 ## Phase 5 – Staff features (backend)
 
-### [ ] Task 5.1 – Employee details API
+### [x] Task 5.1 – Employee details API
 
 Endpoints:
 
@@ -377,7 +377,7 @@ Done when:
 - Ravi's `PATCH /staff/me` with `{"role": "ADMIN"}` leaves his role as EMPLOYEE.
 - Anita's `GET /staff` shows herself, Ravi, and Meena, with `team_count` = 2.
 
-### [ ] Task 5.2 – Announcements API
+### [x] Task 5.2 – Announcements API
 
 Endpoints:
 
@@ -389,7 +389,7 @@ Done when:
 - A customer token gets 401.
 - A LEAD posting gets 403.
 
-### [ ] Task 5.3 – Customer management API
+### [x] Task 5.3 – Customer management API
 
 Endpoints:
 
@@ -404,7 +404,7 @@ Done when:
 - Ravi sees Priya once her ticket is assigned to him.
 - Arjun gets 404 for Priya.
 
-### [ ] Task 5.4 – Dashboard stats API
+### [x] Task 5.4 – Dashboard stats API
 
 `GET /dashboard`, scoped by role. Return counts only:
 
@@ -416,7 +416,7 @@ Done when:
 
 - The numbers match the seed data for each role.
 
-### [ ] Task 5.5 – Deals: role names and customer link
+### [x] Task 5.5 – Deals: role names and customer link
 
 What to do:
 
@@ -432,7 +432,7 @@ Done when:
 
 ## Phase 6 – Frontend
 
-### [ ] Task 6.1 – Entry page and routing
+### [x] Task 6.1 – Entry page and routing
 
 What to do:
 
@@ -448,22 +448,22 @@ Done when:
 
 - Visiting a staff page while logged in only as a customer redirects to the staff login.
 
-### [ ] Task 6.2 – Staff sidebar
+### [x] Task 6.2 – Staff sidebar
 
 Links: Announcements, Dashboard, Employee Details, Support, Deals, Customers. Every role sees all six pages. What they can *do* on each page differs, following the permission table.
 
-### [ ] Task 6.3 – Announcements page
+### [x] Task 6.3 – Announcements page
 
 - All staff see the list.
 - The ADMIN also sees Create, Edit, and Delete (using `Modal` and `ConfirmModal`).
 
-### [ ] Task 6.4 – Employee Details page
+### [x] Task 6.4 – Employee Details page
 
 - **ADMIN:** a table of all staff with Create, Edit, and Delete. The create/edit form has role and lead dropdowns (the lead dropdown only appears when the role is EMPLOYEE).
 - **LEAD:** own profile card (editable safe fields) plus a "My team (N)" table.
 - **EMPLOYEE:** own profile card with editable safe fields.
 
-### [ ] Task 6.5 – Reusable chat component
+### [x] Task 6.5 – Reusable chat component
 
 `TicketChat` component, used by both portals:
 
@@ -473,7 +473,7 @@ Links: Announcements, Dashboard, Employee Details, Support, Deals, Customers. Ev
 - Disables the input box when the ticket is resolved or the view is read-only.
 - Reconnects automatically if the socket drops.
 
-### [ ] Task 6.6 – Customer portal
+### [x] Task 6.6 – Customer portal
 
 - `/shop`: product grid (anyone can browse).
 - `/shop/login` and `/shop/register`.
@@ -481,7 +481,7 @@ Links: Announcements, Dashboard, Employee Details, Support, Deals, Customers. Ev
 - `/shop/orders`: my orders, each with a "Need help?" button that opens a new ticket.
 - `/shop/tickets`: my tickets with status; clicking one opens `TicketChat`.
 
-### [ ] Task 6.7 – Staff Support page
+### [x] Task 6.7 – Staff Support page
 
 - Tabs:
   - **Unassigned:** LEAD and ADMIN only.
@@ -492,12 +492,12 @@ Links: Announcements, Dashboard, Employee Details, Support, Deals, Customers. Ev
   - read-only for the ADMIN,
   - a "Mark resolved" button for the assigned employee and their lead.
 
-### [ ] Task 6.8 – Customer Management page
+### [x] Task 6.8 – Customer Management page
 
 - A table of customers in scope.
 - Clicking one shows their details, orders, and tickets, with a link that opens a ticket in the Support page.
 
-### [ ] Task 6.9 – Dashboard page
+### [x] Task 6.9 – Dashboard page
 
 - Show `StatCard`s from `GET /dashboard`, depending on role.
 - For a LEAD, the unassigned count links to the Unassigned tab.
@@ -506,7 +506,7 @@ Links: Announcements, Dashboard, Employee Details, Support, Deals, Customers. Ev
 
 ## Phase 7 – Wrap-up
 
-### [ ] Task 7.1 – Full dry run and docs
+### [x] Task 7.1 – Full dry run and docs
 
 What to do:
 
