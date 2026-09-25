@@ -160,7 +160,7 @@ Done when:
 - `git grep -n "supabase.com"` and `git grep -n "crm-internal"` return nothing.
 - The backend starts using your local `.env`.
 
-### [ ] Task 0.2 – Development database reset script
+### [x] Task 0.2 – Development database reset script
 
 **Goal:** since the schema is changing a lot, create a clean reset instead of `ALTER TABLE` hacks.
 
