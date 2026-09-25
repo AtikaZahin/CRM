@@ -14,12 +14,13 @@ router = APIRouter(
     tags=["Users"]
 )
 
-VALID_ROLES = ("ADMIN", "MANAGER", "SALESPERSON")
+VALID_ROLES = ("ADMIN", "LEAD", "EMPLOYEE")
 
 class UserCreateAdmin(BaseModel):
     email: EmailStr
     password: str
-    role: str = "SALESPERSON"
+    role: str = "EMPLOYEE"
+    lead_id: Optional[int] = None
     is_active: bool = True
 
 
@@ -27,6 +28,7 @@ class UserUpdateAdmin(BaseModel):
     email: Optional[EmailStr] = None
     password: Optional[str] = None
     role: Optional[str] = None
+    lead_id: Optional[int] = None
     is_active: Optional[bool] = None
 
 
@@ -48,6 +50,17 @@ def create_user(
     if role not in VALID_ROLES:
         raise HTTPException(status_code=400, detail=f"Invalid role. Must be one of: {', '.join(VALID_ROLES)}")
 
+    # Validate lead_id constraint
+    lead_id = payload.lead_id
+    if role == "EMPLOYEE":
+        if not lead_id:
+            raise HTTPException(status_code=400, detail="EMPLOYEE must have a lead_id pointing to a LEAD")
+        lead = db.query(User).filter(User.id == lead_id).first()
+        if not lead or lead.role != "LEAD":
+            raise HTTPException(status_code=400, detail="lead_id must point to a user with role LEAD")
+    else:
+        lead_id = None  # ADMIN and LEAD must have lead_id = NULL
+
     existing = db.query(User).filter(User.email == payload.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -56,6 +69,7 @@ def create_user(
         email=payload.email,
         hashed_password=get_password_hash(payload.password),
         role=role,
+        lead_id=lead_id,
         is_active=payload.is_active,
     )
     db.add(new_user)

@@ -24,7 +24,7 @@ const UsersPage = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'SALESPERSON',
+    role: 'EMPLOYEE',
     is_active: true
   });
 
@@ -104,7 +104,7 @@ const UsersPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingUser(null);
-    setFormData({ email: '', password: '', role: 'SALESPERSON', is_active: true });
+    setFormData({ email: '', password: '', role: 'EMPLOYEE', is_active: true });
   };
 
   if (loading) {
@@ -156,7 +156,7 @@ const UsersPage = () => {
                   </td>
                   <td>
                     <span className={`badge ${
-                      u.role === 'ADMIN' ? 'badge-blue' : u.role === 'MANAGER' ? 'badge-purple' : 'badge-gray'
+                      u.role === 'ADMIN' ? 'badge-blue' : u.role === 'LEAD' ? 'badge-purple' : 'badge-gray'
                     }`}>
                       {u.role}
                     </span>
@@ -229,8 +229,8 @@ const UsersPage = () => {
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
             >
               <option value="ADMIN">Admin (Full Access &amp; User Management)</option>
-              <option value="MANAGER">Manager (Team Management &amp; Assignments)</option>
-              <option value="SALESPERSON">Salesperson (Own Records Only)</option>
+              <option value="LEAD">Lead (Team Management &amp; Assignments)</option>
+              <option value="EMPLOYEE">Employee (Own Records Only)</option>
             </select>
           </div>
 

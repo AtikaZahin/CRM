@@ -210,7 +210,7 @@ Done when:
 
 ## Phase 2 – Staff model and staff auth
 
-### [ ] Task 2.1 – Staff roles and team structure
+### [x] Task 2.1 – Staff roles and team structure
 
 What to do:
 

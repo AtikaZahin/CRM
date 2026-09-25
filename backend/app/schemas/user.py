@@ -12,9 +12,11 @@ class UserCreate(BaseModel):
 class UserResponse(BaseModel):
     id: int
     name: Optional[str] = None
-    username: Optional[str] = None
     email: Optional[str] = None
-    role: str = "salesperson"
+    phone: Optional[str] = None
+    profile: Optional[str] = None
+    role: str = "EMPLOYEE"
+    lead_id: Optional[int] = None
     is_active: bool = True
     created_at: Optional[datetime] = None
 

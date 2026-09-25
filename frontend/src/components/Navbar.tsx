@@ -53,7 +53,7 @@ const Navbar = () => {
               gap: '6px'
             }}>
               {user.email}
-              <span className={`badge ${user.role === 'Admin' ? 'badge-blue' : user.role === 'Manager' ? 'badge-purple' : 'badge-gray'}`} style={{ fontSize: '10px' }}>
+              <span className={`badge ${user.role === 'ADMIN' ? 'badge-blue' : user.role === 'LEAD' ? 'badge-purple' : 'badge-gray'}`} style={{ fontSize: '10px' }}>
                 {user.role}
               </span>
             </span>

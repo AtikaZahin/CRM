@@ -2,7 +2,6 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
 from app.auth.jwt_handler import SECRET_KEY, ALGORITHM
 from app.schemas.token import TokenData
 from app.database.connection import get_db
@@ -24,16 +23,16 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     except JWTError:
         raise credentials_exception
 
-    # Support lookup by either email or username
-    user = db.query(User).filter(
-        or_(
-            User.email == identifier,
-            User.username == identifier
-        )
-    ).first()
+    # Lookup by email only (username removed)
+    user = db.query(User).filter(User.email == identifier).first()
     if user is None:
         raise credentials_exception
+    if not user.is_active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive user")
     return user
+
+# Alias used by this task and future tasks
+get_current_staff = get_current_user
 
 
 def require_role(*allowed_roles: str):
@@ -49,4 +48,6 @@ def require_role(*allowed_roles: str):
 
 
 require_admin = require_role("ADMIN")
-require_manager_or_admin = require_role("ADMIN", "MANAGER")
+require_lead_or_admin = require_role("ADMIN", "LEAD")
+# Keep old name as alias so existing routers don't break yet
+require_manager_or_admin = require_lead_or_admin

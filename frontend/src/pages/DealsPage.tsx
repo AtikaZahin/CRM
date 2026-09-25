@@ -18,7 +18,7 @@ const DealsPage = () => {
   const [formData, setFormData] = useState({ title: '', value: '', status: 'Open', contact_id: '', owner_id: '' });
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const canManageAssignment = currentUser?.role === 'Admin' || currentUser?.role === 'Manager';
+  const canManageAssignment = currentUser?.role === 'ADMIN' || currentUser?.role === 'LEAD';
 
   useEffect(() => {
     if (canManageAssignment) {
