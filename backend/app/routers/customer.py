@@ -68,3 +68,47 @@ def customer_login(payload: CustomerLoginRequest, db: Session = Depends(get_db))
 def get_customer_me(current_customer: Customer = Depends(get_current_customer)):
     """Get the currently logged-in customer's details."""
     return current_customer
+
+from typing import List
+from app.models.order import Order
+from app.models.ticket import Ticket, Message
+from app.schemas.ticket import TicketCreate, TicketResponse
+
+@router.post("/tickets", response_model=TicketResponse)
+def create_customer_ticket(
+    payload: TicketCreate,
+    db: Session = Depends(get_db),
+    current_customer: Customer = Depends(get_current_customer),
+):
+    """Customer opens a new ticket."""
+    order = db.query(Order).filter(Order.id == payload.order_id, Order.customer_id == current_customer.id).first()
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+
+    ticket = Ticket(
+        order_id=order.id,
+        customer_id=current_customer.id,
+        subject=payload.subject,
+        status="OPEN",
+    )
+    db.add(ticket)
+    db.flush()
+
+    message = Message(
+        ticket_id=ticket.id,
+        sender_type="CUSTOMER",
+        sender_id=current_customer.id,
+        content=payload.message,
+    )
+    db.add(message)
+    db.commit()
+    db.refresh(ticket)
+    return ticket
+
+@router.get("/tickets", response_model=List[TicketResponse])
+def get_customer_tickets(
+    db: Session = Depends(get_db),
+    current_customer: Customer = Depends(get_current_customer),
+):
+    """Customer views their tickets."""
+    return db.query(Ticket).filter(Ticket.customer_id == current_customer.id).order_by(Ticket.created_at.desc()).all()

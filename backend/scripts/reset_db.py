@@ -24,6 +24,9 @@ def main() -> None:
     from app.models.deal import Deal  # noqa: F401
     from app.models.product import Product  # noqa: F401
     from app.models.customer import Customer  # noqa: F401
+    from app.models.order import Order  # noqa: F401
+    from app.models.ticket import Ticket, Message  # noqa: F401
+    from app.models.announcement import Announcement  # noqa: F401
 
     # Drop the entire public schema with CASCADE to remove orphan tables
     # (e.g. notes, tasks) that SQLAlchemy no longer manages.

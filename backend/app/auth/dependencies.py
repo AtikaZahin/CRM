@@ -87,3 +87,38 @@ def get_current_customer(
     if customer is None:
         raise credentials_exception
     return customer
+
+
+def get_current_actor(
+    token: str = Depends(OAuth2PasswordBearer(tokenUrl="staff/login", auto_error=False)),
+    db: Session = Depends(get_db),
+) -> User | Customer:
+    """Gets either a staff member or a customer depending on the token's typ."""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    if not token:
+        raise credentials_exception
+        
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        typ = payload.get("typ")
+        sub = payload.get("sub")
+        if not sub or typ not in ["staff", "customer"]:
+            raise credentials_exception
+        actor_id = int(sub)
+    except (JWTError, ValueError, TypeError):
+        raise credentials_exception
+
+    if typ == "staff":
+        user = db.query(User).filter(User.id == actor_id).first()
+        if user is None or not user.is_active:
+            raise credentials_exception
+        return user
+    else:
+        customer = db.query(Customer).filter(Customer.id == actor_id).first()
+        if customer is None:
+            raise credentials_exception
+        return customer

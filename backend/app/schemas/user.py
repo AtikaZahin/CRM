@@ -19,6 +19,12 @@ class UserResponse(BaseModel):
     lead_id: Optional[int] = None
     is_active: bool = True
     created_at: Optional[datetime] = None
+    team_count: Optional[int] = None
 
     class Config:
         from_attributes = True
+
+class StaffUpdateMe(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    profile: Optional[str] = None

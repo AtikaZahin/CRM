@@ -19,3 +19,12 @@ class CustomerResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+from typing import List
+from app.schemas.order import OrderResponse
+from app.schemas.ticket import TicketResponse
+
+class CustomerDetailResponse(CustomerResponse):
+    orders: List[OrderResponse] = []
+    tickets: List[TicketResponse] = []
+

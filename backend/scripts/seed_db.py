@@ -224,21 +224,10 @@ def seed_products(db: Session) -> None:
 
 def seed_customers_and_orders(db: Session) -> None:
     """
-    Seeds 2 customers (Priya, Rahul) and a few sample orders.
-    This function is intentionally a no-op until Task 3.1 adds the
-    Customer and Order models. Once those models exist, replace the
-    try/import block below with the real implementation.
     """
-    try:
-        from app.models.customer import Customer  # type: ignore # noqa: F401
-        from app.models.order import Order        # type: ignore # noqa: F401
-    except ImportError:
-        print("  [skip] Customer/Order models not yet created (Task 3.1). Skipping.")
-        return
-
     # --- Customer seeding ---
-    from app.models.customer import Customer  # type: ignore
-    from app.models.order import Order        # type: ignore
+    from app.models.customer import Customer
+    from app.models.order import Order
 
     hashed = get_password_hash(DEFAULT_PASSWORD)
 
