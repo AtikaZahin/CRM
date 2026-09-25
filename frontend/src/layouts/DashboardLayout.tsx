@@ -3,7 +3,6 @@ import { Outlet } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import { ChatProvider } from '../context/ChatContext';
-import ChatDrawer from '../components/ChatDrawer';
 
 const DashboardLayout = () => {
   return (
@@ -19,7 +18,7 @@ const DashboardLayout = () => {
           </main>
         </div>
       </div>
-      <ChatDrawer />
+      {/* AI Chat Drawer temporarily hidden */}
     </ChatProvider>
   );
 };

@@ -192,7 +192,7 @@ Done when:
 - The backend starts with no import errors.
 - The frontend builds (`npm run build`), and the Deals page still works.
 
-### [ ] Task 1.2 – Temporarily disable the AI chat
+### [x] Task 1.2 – Temporarily disable the AI chat
 
 The AI agent will come back later as a support assistant. For now, turn it off so it can't bypass permissions.
 
