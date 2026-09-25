@@ -1,8 +1,13 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres.irkxutkvbdgukeykdpii:mycrmdatabasee@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres"
+load_dotenv()
+
+SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL")
+if not SQLALCHEMY_DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is missing")
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL

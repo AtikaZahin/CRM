@@ -3,9 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Capstone API", version="1.0.0")
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+origins = os.environ.get("FRONTEND_ORIGINS", "http://localhost:5173").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

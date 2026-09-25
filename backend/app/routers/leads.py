@@ -9,8 +9,9 @@ from app.schemas.lead import LeadCreate, LeadResponse
 from app.auth.dependencies import get_current_user, require_manager_or_admin, require_admin
 from app.models.user import User
 
+import os
 # Internal API key for AI agent to call these endpoints without OAuth2
-INTERNAL_API_KEY = "crm-internal-ai-agent-key"
+INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY")
 
 router = APIRouter(
     prefix="/leads",

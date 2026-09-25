@@ -172,3 +172,8 @@ captures/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Secrets and Databases
+*.db
+**/.env
+google_credentials.json

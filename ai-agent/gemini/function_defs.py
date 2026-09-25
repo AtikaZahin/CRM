@@ -40,8 +40,9 @@ def get_auth_headers():
         print(f"Auth error: {e}")
     return {"Content-Type": "application/json"}
 
+import os
 # Internal API key — shared secret between ai-agent and FastAPI backend
-INTERNAL_API_KEY = "crm-internal-ai-agent-key"
+INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY")
 
 AGENT_HEADERS = {
     "X-API-Key": INTERNAL_API_KEY,
