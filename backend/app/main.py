@@ -20,11 +20,7 @@ app.add_middleware(
 from app.database.connection import engine
 from app.database.base import Base
 from app.models.user import User
-from app.models.lead import Lead
-from app.models.contact import Contact
 from app.models.deal import Deal
-from app.models.task import Task
-from app.models.note import Note
 
 from sqlalchemy import text
 
@@ -35,12 +31,9 @@ Base.metadata.create_all(bind=engine)
 def read_root():
     return {"message": "Welcome to the Capstone API"}
 
-from app.routers import auth, leads, contacts, deals, tasks, ai, oauth, users
+from app.routers import auth, deals, ai, oauth, users
 app.include_router(auth.router)
-app.include_router(leads.router)
-app.include_router(contacts.router)
 app.include_router(deals.router)
-app.include_router(tasks.router)
 app.include_router(ai.router)
 app.include_router(oauth.router)
 app.include_router(users.router)

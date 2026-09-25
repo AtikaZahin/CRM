@@ -22,26 +22,21 @@ const DashboardPage = () => {
     fetchStats();
   }, []);
 
-  const fetchStats = async () => {
+    const fetchStats = async () => {
     try {
-      const [leadsRes, contactsRes, dealsRes, tasksRes] = await Promise.all([
-        api.get('/leads/'),
-        api.get('/contacts/'),
+      const [dealsRes] = await Promise.all([
         api.get('/deals/'),
-        api.get('/tasks/'),
       ]);
 
       const openDealsValue = dealsRes.data
         .filter((d: any) => d.status !== 'Won' && d.status !== 'Lost')
         .reduce((sum: number, d: any) => sum + (d.value || 0), 0);
 
-      const pendingTasks = tasksRes.data.filter((t: any) => !t.is_completed).length;
-
       setStats({
-        totalLeads: leadsRes.data.length,
-        activeContacts: contactsRes.data.length,
+        totalLeads: 0,
+        activeContacts: 0,
         openDealsValue,
-        pendingTasks,
+        pendingTasks: 0,
       });
     } catch (err) {
       console.error('Failed to fetch dashboard stats', err);

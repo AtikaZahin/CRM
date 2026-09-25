@@ -4,10 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 const baseLinks = [
   { name: 'Dashboard', path: '/',        icon: '◈' },
-  { name: 'Leads',     path: '/leads',   icon: '◎' },
-  { name: 'Contacts',  path: '/contacts',icon: '◉' },
   { name: 'Deals',     path: '/deals',   icon: '◇' },
-  { name: 'Tasks',     path: '/tasks',   icon: '◻' },
 ];
 
 const Sidebar = () => {

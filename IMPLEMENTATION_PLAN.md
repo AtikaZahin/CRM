@@ -178,7 +178,7 @@ Done when:
 
 ## Phase 1 – Remove what's no longer needed
 
-### [ ] Task 1.1 – Remove old Leads, Contacts, Tasks, Notes
+### [x] Task 1.1 – Remove old Leads, Contacts, Tasks, Notes
 
 What to do:
 

@@ -5,7 +5,6 @@ class DealBase(BaseModel):
     title: str
     value: float = 0.0
     status: str = "Open"
-    contact_id: Optional[int] = None
 
 class DealCreate(DealBase):
     pass

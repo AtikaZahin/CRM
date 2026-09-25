@@ -16,6 +16,4 @@ class User(Base):
     role: Mapped[str] = mapped_column(String, default="SALESPERSON")
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
 
-    leads: Mapped[List["Lead"]] = relationship("Lead", back_populates="owner")
     deals: Mapped[List["Deal"]] = relationship("Deal", back_populates="owner")
-    tasks: Mapped[List["Task"]] = relationship("Task", back_populates="user")

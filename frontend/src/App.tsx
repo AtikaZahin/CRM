@@ -6,10 +6,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import DashboardLayout from './layouts/DashboardLayout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
-import LeadsPage from './pages/LeadsPage';
-import ContactsPage from './pages/ContactsPage';
 import DealsPage from './pages/DealsPage';
-import TasksPage from './pages/TasksPage';
 import RegisterPage from './pages/RegisterPage';
 import UsersPage from './pages/UsersPage';
 import RoleSelectorPage from './pages/RoleSelectorPage';
@@ -47,10 +44,7 @@ function App() {
 
             <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
               <Route path="/"        element={<DashboardPage />} />
-              <Route path="/leads"   element={<LeadsPage />} />
-              <Route path="/contacts"element={<ContactsPage />} />
               <Route path="/deals"   element={<DealsPage />} />
-              <Route path="/tasks"   element={<TasksPage />} />
               <Route path="/users"   element={<UsersPage />} />
               <Route path="*"        element={<Navigate to="/" replace />} />
             </Route>

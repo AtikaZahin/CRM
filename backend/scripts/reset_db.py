@@ -16,11 +16,7 @@ def main():
     
     # Import all models to ensure they are registered
     from app.models.user import User
-    from app.models.lead import Lead
-    from app.models.contact import Contact
     from app.models.deal import Deal
-    from app.models.task import Task
-    from app.models.note import Note
     
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)

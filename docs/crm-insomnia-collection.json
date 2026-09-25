@@ -1,161 +1,176 @@
 {
-	"_type": "export",
-	"__export_format": 4,
-	"__export_date": "2026-08-06T22:45:00.000Z",
-	"__export_source": "insomnia.desktop.app:v8.0.0",
-	"resources": [
-		{
-			"_id": "wrk_crm_001",
-			"_type": "workspace",
-			"parentId": null,
-			"modified": 1723000000000,
-			"created": 1723000000000,
-			"name": "CRM System API",
-			"description": "Shared Insomnia Collection for CRM REST API endpoints (Auth, Leads, Contacts, Deals, Tasks, Notes, AI Chat)",
-			"scope": "design"
-		},
-		{
-			"_id": "env_local_001",
-			"_type": "environment",
-			"parentId": "wrk_crm_001",
-			"modified": 1723000000000,
-			"created": 1723000000000,
-			"name": "Local Environment",
-			"data": {
-				"base_url": "http://localhost:8000",
-				"auth_token": ""
-			},
-			"dataPropertyOrder": {
-				"&": ["base_url", "auth_token"]
-			},
-			"color": "#7d69ff",
-			"isPrivate": false,
-			"metaSortKey": 1
-		},
-		{
-			"_id": "fld_auth",
-			"_type": "request_group",
-			"parentId": "wrk_crm_001",
-			"modified": 1723000000000,
-			"created": 1723000000000,
-			"name": "Authentication",
-			"environment": {},
-			"environmentPropertyOrder": null,
-			"metaSortKey": 1
-		},
-		{
-			"_id": "req_register",
-			"_type": "request",
-			"parentId": "fld_auth",
-			"modified": 1723000000000,
-			"created": 1723000000000,
-			"url": "{{ _.base_url }}/auth/register",
-			"name": "Register User",
-			"method": "POST",
-			"body": {
-				"mimeType": "application/json",
-				"text": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
-			},
-			"headers": [
-				{ "name": "Content-Type", "value": "application/json" }
-			],
-			"authentication": {}
-		},
-		{
-			"_id": "req_login",
-			"_type": "request",
-			"parentId": "fld_auth",
-			"modified": 1723000000000,
-			"created": 1723000000000,
-			"url": "{{ _.base_url }}/auth/login",
-			"name": "Login User",
-			"method": "POST",
-			"body": {
-				"mimeType": "application/json",
-				"text": "{\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
-			},
-			"headers": [
-				{ "name": "Content-Type", "value": "application/json" }
-			],
-			"authentication": {}
-		},
-		{
-			"_id": "fld_leads",
-			"_type": "request_group",
-			"parentId": "wrk_crm_001",
-			"modified": 1723000000000,
-			"created": 1723000000000,
-			"name": "Leads",
-			"environment": {},
-			"metaSortKey": 2
-		},
-		{
-			"_id": "req_get_leads",
-			"_type": "request",
-			"parentId": "fld_leads",
-			"modified": 1723000000000,
-			"created": 1723000000000,
-			"url": "{{ _.base_url }}/leads",
-			"name": "Get All Leads",
-			"method": "GET",
-			"body": {},
-			"headers": [],
-			"authentication": {
-				"type": "bearer",
-				"token": "{{ _.auth_token }}"
-			}
-		},
-		{
-			"_id": "req_create_lead",
-			"_type": "request",
-			"parentId": "fld_leads",
-			"modified": 1723000000000,
-			"created": 1723000000000,
-			"url": "{{ _.base_url }}/leads",
-			"name": "Create Lead",
-			"method": "POST",
-			"body": {
-				"mimeType": "application/json",
-				"text": "{\n  \"name\": \"Rahul Sharma\",\n  \"company\": \"Infosys\",\n  \"email\": \"rahul@infosys.com\",\n  \"phone\": \"+919876543210\",\n  \"status\": \"new\"\n}"
-			},
-			"headers": [
-				{ "name": "Content-Type", "value": "application/json" }
-			],
-			"authentication": {
-				"type": "bearer",
-				"token": "{{ _.auth_token }}"
-			}
-		},
-		{
-			"_id": "fld_ai_chat",
-			"_type": "request_group",
-			"parentId": "wrk_crm_001",
-			"modified": 1723000000000,
-			"created": 1723000000000,
-			"name": "AI Chat",
-			"environment": {},
-			"metaSortKey": 3
-		},
-		{
-			"_id": "req_ai_chat",
-			"_type": "request",
-			"parentId": "fld_ai_chat",
-			"modified": 1723000000000,
-			"created": 1723000000000,
-			"url": "{{ _.base_url }}/ai/chat",
-			"name": "AI Natural Language Chat",
-			"method": "POST",
-			"body": {
-				"mimeType": "application/json",
-				"text": "{\n  \"message\": \"Add a new lead: Rahul Sharma from Infosys, email rahul@infosys.com, phone 9876543210\",\n  \"conversation_id\": \"conv-mobile-001\"\n}"
-			},
-			"headers": [
-				{ "name": "Content-Type", "value": "application/json" }
-			],
-			"authentication": {
-				"type": "bearer",
-				"token": "{{ _.auth_token }}"
-			}
-		}
-	]
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-08-06T22:45:00.000Z",
+  "__export_source": "insomnia.desktop.app:v8.0.0",
+  "resources": [
+    {
+      "_id": "wrk_crm_001",
+      "_type": "workspace",
+      "parentId": null,
+      "modified": 1723000000000,
+      "created": 1723000000000,
+      "name": "CRM System API",
+      "description": "Shared Insomnia Collection for CRM REST API endpoints (Auth, Leads, Contacts, Deals, Tasks, Notes, AI Chat)",
+      "scope": "design"
+    },
+    {
+      "_id": "env_local_001",
+      "_type": "environment",
+      "parentId": "wrk_crm_001",
+      "modified": 1723000000000,
+      "created": 1723000000000,
+      "name": "Local Environment",
+      "data": {
+        "base_url": "http://localhost:8000",
+        "auth_token": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "auth_token"
+        ]
+      },
+      "color": "#7d69ff",
+      "isPrivate": false,
+      "metaSortKey": 1
+    },
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "parentId": "wrk_crm_001",
+      "modified": 1723000000000,
+      "created": 1723000000000,
+      "name": "Authentication",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 1
+    },
+    {
+      "_id": "req_register",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "modified": 1723000000000,
+      "created": 1723000000000,
+      "url": "{{ _.base_url }}/auth/register",
+      "name": "Register User",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {}
+    },
+    {
+      "_id": "req_login",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "modified": 1723000000000,
+      "created": 1723000000000,
+      "url": "{{ _.base_url }}/auth/login",
+      "name": "Login User",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {}
+    },
+    {
+      "_id": "fld_leads",
+      "_type": "request_group",
+      "parentId": "wrk_crm_001",
+      "modified": 1723000000000,
+      "created": 1723000000000,
+      "name": "Leads",
+      "environment": {},
+      "metaSortKey": 2
+    },
+    {
+      "_id": "req_get_leads",
+      "_type": "request",
+      "parentId": "fld_leads",
+      "modified": 1723000000000,
+      "created": 1723000000000,
+      "url": "{{ _.base_url }}/leads",
+      "name": "Get All Leads",
+      "method": "GET",
+      "body": {},
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      }
+    },
+    {
+      "_id": "req_create_lead",
+      "_type": "request",
+      "parentId": "fld_leads",
+      "modified": 1723000000000,
+      "created": 1723000000000,
+      "url": "{{ _.base_url }}/leads",
+      "name": "Create Lead",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Rahul Sharma\",\n  \"company\": \"Infosys\",\n  \"email\": \"rahul@infosys.com\",\n  \"phone\": \"+919876543210\",\n  \"status\": \"new\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      }
+    },
+    {
+      "_id": "fld_ai_chat",
+      "_type": "request_group",
+      "parentId": "wrk_crm_001",
+      "modified": 1723000000000,
+      "created": 1723000000000,
+      "name": "AI Chat",
+      "environment": {},
+      "metaSortKey": 3
+    },
+    {
+      "_id": "req_ai_chat",
+      "_type": "request",
+      "parentId": "fld_ai_chat",
+      "modified": 1723000000000,
+      "created": 1723000000000,
+      "url": "{{ _.base_url }}/ai/chat",
+      "name": "AI Natural Language Chat",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"message\": \"Add a new lead: Rahul Sharma from Infosys, email rahul@infosys.com, phone 9876543210\",\n  \"conversation_id\": \"conv-mobile-001\"\n}"
+      },
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      }
+    }
+  ]
 }
