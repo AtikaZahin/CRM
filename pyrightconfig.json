@@ -1,6 +1,9 @@
 {
+  "pythonPath": "D:/Programs/Python314/python.exe",
   "extraPaths": [
     "ai-agent",
     "backend"
-  ]
+  ],
+  "typeCheckingMode": "basic",
+  "reportMissingModuleSource": "none"
 }

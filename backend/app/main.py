@@ -21,6 +21,8 @@ from app.database.connection import engine
 from app.database.base import Base
 from app.models.user import User
 from app.models.deal import Deal
+from app.models.product import Product
+from app.models.customer import Customer
 
 from sqlalchemy import text
 
@@ -31,7 +33,8 @@ Base.metadata.create_all(bind=engine)
 def read_root():
     return {"message": "Welcome to the Capstone API"}
 
-from app.routers import auth, deals, users
+from app.routers import auth, deals, users, customer
 app.include_router(auth.router)
 app.include_router(deals.router)
 app.include_router(users.router)
+app.include_router(customer.router)

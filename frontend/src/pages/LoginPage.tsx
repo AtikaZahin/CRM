@@ -1,37 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Link, useParams } from 'react-router-dom';
 import { api } from '../services/api';
 
-type Role = 'salesperson' | 'manager' | 'admin';
-
-const ROLE_META: Record<Role, { label: string; badge: string; accentHex: string; icon: string }> = {
-  salesperson: {
-    label: 'Salesperson',
-    badge: 'Standard Access',
-    accentHex: '#4a5a35',
-    icon: '👤',
-  },
-  manager: {
-    label: 'Manager',
-    badge: 'Team Access',
-    accentHex: '#a3672f',
-    icon: '📊',
-  },
-  admin: {
-    label: 'Admin',
-    badge: 'Full Access',
-    accentHex: '#7a3b3b',
-    icon: '⚙️',
-  },
-};
-
 const LoginPage = () => {
-  const { role: roleParam } = useParams<{ role: string }>();
-  const role: Role = (roleParam as Role) || 'salesperson';
-  const meta = ROLE_META[role] ?? ROLE_META['salesperson'];
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -44,14 +16,7 @@ const LoginPage = () => {
     setError('');
     setLoading(true);
     try {
-      const formData = new URLSearchParams();
-      formData.append('username', email);
-      formData.append('password', password);
-
-      const response = await api.post('/login', formData, {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      });
-
+      const response = await api.post('/staff/login', { email, password });
       const { access_token } = response.data;
       await login(access_token);
     } catch (err: any) {
@@ -78,15 +43,6 @@ const LoginPage = () => {
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          {/* Only User portal shows a "Create account" link in nav */}
-          {role === 'salesperson' && (
-            <Link to="/register/salesperson" className="btn btn-outline btn-sm">
-              Create account
-            </Link>
-          )}
-          <Link to="/login" className="btn btn-outline btn-sm">
-            ← Portals
-          </Link>
         </div>
       </div>
 
@@ -95,7 +51,7 @@ const LoginPage = () => {
         <div className="auth-card" style={{ maxWidth: 440 }}>
           {/* Role badge */}
           <div className="row gap-8" style={{ marginBottom: 16 }}>
-            <span style={{ fontSize: 20 }}>{meta.icon}</span>
+            <span style={{ fontSize: 20 }}>🏢</span>
             <span
               style={{
                 fontSize: 9,
@@ -103,17 +59,17 @@ const LoginPage = () => {
                 fontWeight: 600,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
-                color: meta.accentHex,
-                background: `${meta.accentHex}18`,
-                border: `1px solid ${meta.accentHex}40`,
+                color: '#7a3b3b',
+                background: '#7a3b3b18',
+                border: '1px solid #7a3b3b40',
                 padding: '4px 10px',
               }}
             >
-              {meta.badge}
+              Staff Portal
             </span>
           </div>
 
-          <h2 className="auth-title">{meta.label} Portal</h2>
+          <h2 className="auth-title">Staff Login</h2>
           <p className="auth-subtitle">Sign in to continue</p>
 
           {error && (
@@ -135,13 +91,13 @@ const LoginPage = () => {
 
           <form onSubmit={handleSubmit} className="stack gap-12" style={{ marginBottom: 20 }}>
             <div className="field">
-              <label className="label" htmlFor={`login-email-${role}`}>
-                Username / Email
+              <label className="label" htmlFor="login-email">
+                Email
               </label>
               <input
-                id={`login-email-${role}`}
-                type="text"
-                placeholder="Enter your credentials"
+                id="login-email"
+                type="email"
+                placeholder="Enter your email"
                 className="input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -150,11 +106,11 @@ const LoginPage = () => {
             </div>
 
             <div className="field">
-              <label className="label" htmlFor={`login-password-${role}`}>
+              <label className="label" htmlFor="login-password">
                 Password
               </label>
               <input
-                id={`login-password-${role}`}
+                id="login-password"
                 type="password"
                 placeholder="••••••••"
                 className="input"
@@ -168,27 +124,11 @@ const LoginPage = () => {
               type="submit"
               className="btn btn-primary"
               disabled={loading}
-              style={{
-                width: '100%',
-                justifyContent: 'center',
-                marginTop: 4,
-                background: meta.accentHex,
-                borderColor: meta.accentHex,
-              }}
+              style={{ width: '100%', justifyContent: 'center', marginTop: 4 }}
             >
-              {loading ? 'Signing in…' : `Sign In as ${meta.label}`}
+              {loading ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
-
-          {/* Sign-up link — User portal only */}
-          {role === 'salesperson' && (
-            <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--muted)' }}>
-              No account?{' '}
-              <Link to="/register/salesperson" style={{ color: meta.accentHex, fontWeight: 500 }}>
-                Create one
-              </Link>
-            </p>
-          )}
         </div>
       </div>
     </div>

@@ -224,7 +224,7 @@ Done when:
 
 - `git grep -n -i "salesperson\|manager"` shows no role usages left.
 
-### [ ] Task 2.2 – Staff login with token type
+### [x] Task 2.2 – Staff login with token type
 
 What to do:
 
@@ -239,7 +239,7 @@ Done when:
 - Anita can log in, and `/staff/me` returns her with role `LEAD`.
 - An inactive user cannot log in.
 
-### [ ] Task 2.3 – Seed script
+### [x] Task 2.3 – Seed script
 
 What to do:
 
@@ -256,7 +256,7 @@ Done when:
 
 ## Phase 3 – Customers, products, orders
 
-### [ ] Task 3.1 – Customer accounts and customer auth
+### [x] Task 3.1 – Customer accounts and customer auth
 
 What to do:
 

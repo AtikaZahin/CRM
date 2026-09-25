@@ -1,32 +1,37 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+from dotenv import load_dotenv
+from jose import jwt
 from passlib.context import CryptContext
-from jose import JWTError, jwt
+
+# Load backend/.env
+env_path = os.path.join(os.path.dirname(__file__), "..", "..", ".env")
+load_dotenv(dotenv_path=env_path)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-from dotenv import load_dotenv
-load_dotenv()
+_secret = os.getenv("SECRET_KEY")
+if not _secret:
+    raise RuntimeError("SECRET_KEY is not set in backend/.env")
+SECRET_KEY: str = _secret  # declared as str -> no type-checker warning on import
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
-if not SECRET_KEY:
-    raise ValueError("SECRET_KEY environment variable is missing")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-def verify_password(plain_password, hashed_password):
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-def get_password_hash(password):
+
+def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-    
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

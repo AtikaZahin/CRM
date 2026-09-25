@@ -7,7 +7,6 @@ import DashboardLayout from './layouts/DashboardLayout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import DealsPage from './pages/DealsPage';
-import RegisterPage from './pages/RegisterPage';
 import UsersPage from './pages/UsersPage';
 import RoleSelectorPage from './pages/RoleSelectorPage';
 
@@ -37,9 +36,7 @@ function App() {
             <Route path="/login"          element={<RoleSelectorPage />} />
             {/* Role-specific login portals */}
             <Route path="/login/:role"    element={<LoginPage />} />
-            {/* Salesperson-only registration */}
-            <Route path="/register/salesperson" element={<RegisterPage />} />
-            {/* Legacy /register → role selector */}
+            {/* Legacy /register → login */}
             <Route path="/register"      element={<Navigate to="/login" replace />} />
 
             <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>

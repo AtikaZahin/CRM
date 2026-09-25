@@ -6,9 +6,11 @@ import { api } from '../services/api';
 interface UserProfile {
   id: number;
   name?: string;
-  username?: string;
   email?: string;
+  phone?: string;
+  profile?: string;
   role: string;
+  lead_id?: number | null;
   is_active: boolean;
 }
 
@@ -24,9 +26,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [token, setToken] = useState<string | null>(localStorage.getItem('staff_token'));
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(!!localStorage.getItem('token'));
+  const [isLoading, setIsLoading] = useState<boolean>(!!localStorage.getItem('staff_token'));
   const navigate = useNavigate();
 
   const fetchProfile = async (authToken?: string) => {
@@ -34,12 +36,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const headers = authToken
         ? { Authorization: `Bearer ${authToken}` }
         : undefined;
-      const res = await api.get('/auth/me', { headers });
+      const res = await api.get('/staff/me', { headers });
       setUser(res.data);
     } catch (err) {
       console.error('Failed to fetch user profile:', err);
-      // Only logout if we had a token — don't loop
-      localStorage.removeItem('token');
+      localStorage.removeItem('staff_token');
       setToken(null);
       setUser(null);
     } finally {
@@ -57,16 +58,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [token]);
 
   const login = async (newToken: string) => {
-    localStorage.setItem('token', newToken);
+    localStorage.setItem('staff_token', newToken);
     setIsLoading(true);
     setToken(newToken);
-    // fetchProfile will be triggered by the useEffect above
-    // Navigate immediately — ProtectedRoute will show spinner until profile loads
     navigate('/');
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('staff_token');
     setToken(null);
     setUser(null);
     navigate('/login');
@@ -90,7 +89,6 @@ export const useAuth = () => {
 export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated, isLoading, token } = useAuth();
 
-  // Still loading the user profile — show spinner instead of redirecting
   if (isLoading || (token && !isAuthenticated)) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
