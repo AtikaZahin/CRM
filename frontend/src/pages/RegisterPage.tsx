@@ -48,18 +48,19 @@ const RegisterPage = () => {
       <div className="auth-body">
         <div className="auth-card" style={{ maxWidth: 440 }}>
           <div className="row gap-8" style={{ marginBottom: 16 }}>
-            <span style={{ fontSize: 20 }}>🛒</span>
+            <span style={{ fontSize: 20 }}>🛍️</span>
             <span
               style={{
                 fontSize: 9,
-                fontFamily: 'var(--font-mono)',
+                fontFamily: 'var(--font)',
                 fontWeight: 600,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
-                color: '#a3672f',
-                background: '#a3672f18',
-                border: `1px solid #a3672f40`,
+                color: 'var(--status-progress-color)',
+                background: 'var(--status-progress-bg)',
+                border: `1px solid rgba(154,111,42,0.30)`,
                 padding: '4px 10px',
+                borderRadius: '99px',
               }}
             >
               Customer Portal
@@ -70,18 +71,7 @@ const RegisterPage = () => {
           <p className="auth-subtitle">Register to continue</p>
 
           {error && (
-            <div
-              style={{
-                marginBottom: 16,
-                padding: '9px 14px',
-                background: 'var(--ember-light)',
-                border: '1px solid rgba(122,59,59,0.2)',
-                borderRadius: 'var(--r)',
-                fontSize: 12,
-                color: 'var(--ember)',
-                fontFamily: 'var(--font-mono)',
-              }}
-            >
+            <div className="alert-error">
               {error}
             </div>
           )}

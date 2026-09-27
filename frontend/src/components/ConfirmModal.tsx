@@ -27,7 +27,6 @@ const ConfirmModal = ({
         <button 
           onClick={onClose}
           className="btn btn-outline btn-sm"
-          style={{ borderRadius: 0 }}
         >
           Cancel
         </button>
@@ -37,12 +36,6 @@ const ConfirmModal = ({
             onClose();
           }}
           className="btn btn-danger btn-sm"
-          style={{ 
-            background: 'var(--ember)', 
-            color: '#ffffff', 
-            border: 'none',
-            borderRadius: 0 
-          }}
         >
           {confirmText}
         </button>

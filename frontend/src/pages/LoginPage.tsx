@@ -45,15 +45,16 @@ const LoginPresenter = ({ type, onLogin }: { type: 'staff' | 'customer', onLogin
       <div className="auth-body">
         <div className="auth-card" style={{ maxWidth: 440 }}>
           <div className="row gap-8" style={{ marginBottom: 16 }}>
-            <span style={{ fontSize: 20 }}>{type === 'staff' ? '🏢' : '🛒'}</span>
+            <span style={{ fontSize: 20 }}>{type === 'staff' ? '🏢' : '🛍️'}</span>
             <span
               style={{
-                fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 600,
+                fontSize: 9, fontFamily: 'var(--font)', fontWeight: 600,
                 letterSpacing: '0.12em', textTransform: 'uppercase',
-                color: type === 'staff' ? '#7a3b3b' : '#a3672f',
-                background: type === 'staff' ? '#7a3b3b18' : '#a3672f18',
-                border: `1px solid ${type === 'staff' ? '#7a3b3b40' : '#a3672f40'}`,
+                color: type === 'staff' ? 'var(--rose)' : 'var(--status-progress-color)',
+                background: type === 'staff' ? 'var(--blush)' : 'var(--status-progress-bg)',
+                border: `1px solid ${type === 'staff' ? 'rgba(217,141,126,0.35)' : 'rgba(154,111,42,0.30)'}`,
                 padding: '4px 10px',
+                borderRadius: '99px',
               }}
             >
               {type === 'staff' ? 'Staff Portal' : 'Customer Portal'}
@@ -64,13 +65,7 @@ const LoginPresenter = ({ type, onLogin }: { type: 'staff' | 'customer', onLogin
           <p className="auth-subtitle">Sign in to continue</p>
 
           {error && (
-            <div
-              style={{
-                marginBottom: 16, padding: '9px 14px', background: 'var(--ember-light)',
-                border: '1px solid rgba(122,59,59,0.2)', borderRadius: 'var(--r)',
-                fontSize: 12, color: 'var(--ember)', fontFamily: 'var(--font-mono)',
-              }}
-            >
+            <div className="alert-error">
               {error}
             </div>
           )}

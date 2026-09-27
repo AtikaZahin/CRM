@@ -9,7 +9,7 @@ const roles = [
     icon: '⚙️',
     description: 'System-wide control and configurations.',
     badge: 'Staff Portal',
-    accentHex: '#7a3b3b',
+    accentHex: '#d98d7e',
     path: '/staff/login',
   },
   {
@@ -18,16 +18,16 @@ const roles = [
     icon: '👤',
     description: 'Access your CRM dashboard and tickets.',
     badge: 'Staff Portal',
-    accentHex: '#4a5a35',
+    accentHex: '#5a7350',
     path: '/staff/login',
   },
   {
     key: 'customer',
     label: 'Customer',
-    icon: '🛒',
+    icon: '🛍️',
     description: 'View orders and manage support tickets.',
     badge: 'Customer Portal',
-    accentHex: '#a3672f',
+    accentHex: '#9a6f2a',
     path: '/shop/login',
   },
 ];
@@ -107,23 +107,23 @@ const RoleSelectorPage = () => {
               style={{
                 background: 'var(--surface)',
                 border: '1px solid var(--border)',
+                borderRadius: 'var(--r-lg)',
                 padding: '32px 28px',
                 textAlign: 'left',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
+                transition: 'all 0.2s cubic-bezier(0.22, 1, 0.36, 1)',
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: 'var(--shadow)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 12,
-                borderRadius: 0,
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget;
                 el.style.borderColor = role.accentHex;
                 el.style.transform = 'translateY(-4px)';
-                el.style.boxShadow = `0 12px 40px rgba(43,32,19,0.18), inset 0 0 0 2px ${role.accentHex}`;
+                el.style.boxShadow = `0 16px 44px rgba(74,66,60,0.14), inset 0 0 0 2px ${role.accentHex}30`;
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget;
@@ -152,8 +152,7 @@ const RoleSelectorPage = () => {
                   style={{
                     fontFamily: 'var(--font-display)',
                     fontSize: 22,
-                    fontWeight: 500,
-                    fontStyle: 'italic',
+                    fontWeight: 700,
                     color: 'var(--ink)',
                   }}
                 >
@@ -162,14 +161,15 @@ const RoleSelectorPage = () => {
                 <span
                   style={{
                     fontSize: 9,
-                    fontFamily: 'var(--font-mono)',
+                    fontFamily: 'var(--font)',
                     fontWeight: 600,
-                    letterSpacing: '0.1em',
+                    letterSpacing: '0.12em',
                     textTransform: 'uppercase',
                     color: role.accentHex,
                     background: `${role.accentHex}18`,
                     border: `1px solid ${role.accentHex}40`,
-                    padding: '3px 8px',
+                    padding: '3px 10px',
+                    borderRadius: '99px',
                   }}
                 >
                   {role.badge}

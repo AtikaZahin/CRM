@@ -17,7 +17,7 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
         if (e.target === e.currentTarget) onClose(); 
       }}
     >
-      <div className="modal" style={{ borderRadius: 0 }}>
+      <div className="modal">
         <div className="modal-header">
           <h2 className="modal-title">{title}</h2>
           <button 

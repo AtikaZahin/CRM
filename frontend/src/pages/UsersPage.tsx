@@ -42,21 +42,21 @@ const ProfileCard = ({ user, teamCount, onUpdate }: { user: UserItem; teamCount?
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden' }}>
       {/* Header bar */}
-      <div style={{ background: 'linear-gradient(135deg, var(--accent) 0%, var(--child) 100%)', padding: '24px 24px 20px', color: '#fff' }}>
+      <div style={{ background: 'linear-gradient(135deg, var(--rose) 0%, #c57a6b 100%)', padding: '24px 24px 20px', color: '#fff', borderRadius: 'var(--r) var(--r) 0 0' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700, marginBottom: 12 }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, marginBottom: 12 }}>
               {(user.name || user.email).charAt(0).toUpperCase()}
             </div>
-            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>{user.name || '—'}</h2>
-            <p style={{ margin: '4px 0 0', opacity: 0.85, fontSize: 13 }}>{user.email}</p>
+            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, fontFamily: 'var(--font-display)' }}>{user.name || '—'}</h2>
+            <p style={{ margin: '4px 0 0', opacity: 0.85, fontSize: 13, fontFamily: 'var(--font)' }}>{user.email}</p>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <span style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 600 }}>
+            <span style={{ background: 'rgba(255,255,255,0.22)', borderRadius: 99, padding: '4px 12px', fontSize: 11, fontWeight: 600, fontFamily: 'var(--font)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {user.role}
             </span>
             {teamCount !== undefined && (
-              <div style={{ marginTop: 10, background: 'rgba(255,255,255,0.2)', borderRadius: 20, padding: '4px 12px', fontSize: 12 }}>
+              <div style={{ marginTop: 10, background: 'rgba(255,255,255,0.18)', borderRadius: 99, padding: '4px 12px', fontSize: 12, fontFamily: 'var(--font)' }}>
                 👥 {teamCount} team member{teamCount !== 1 ? 's' : ''}
               </div>
             )}

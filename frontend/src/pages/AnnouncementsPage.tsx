@@ -118,7 +118,7 @@ const AnnouncementsPage = () => {
           </div>
         ) : (
           announcements.map((item) => (
-            <div key={item.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', padding: 24, borderRadius: 'var(--r)', position: 'relative' }}>
+            <div key={item.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', padding: 24, borderRadius: 'var(--r)', position: 'relative', boxShadow: 'var(--shadow)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <h3 style={{ margin: 0, fontSize: 18, color: 'var(--ink)' }}>{item.title}</h3>
                 {isAdmin && (
@@ -132,7 +132,7 @@ const AnnouncementsPage = () => {
                   </div>
                 )}
               </div>
-              <p style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono)', marginTop: 8, marginBottom: 16 }}>
+              <p style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font)', marginTop: 8, marginBottom: 16, letterSpacing: '0.02em' }}>
                 Posted on {new Date(item.created_at).toLocaleDateString()}
               </p>
               <div style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>

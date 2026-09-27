@@ -60,7 +60,7 @@ const Navbar = () => {
             <button
               onClick={logout}
               className="btn btn-outline btn-sm"
-              style={{ borderColor: 'rgba(122,59,59,0.35)', color: 'var(--ember)' }}
+              style={{ borderColor: 'rgba(217,112,112,0.40)', color: 'var(--danger)' }}
             >
               Sign out
             </button>

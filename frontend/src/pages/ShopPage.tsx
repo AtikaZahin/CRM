@@ -74,13 +74,16 @@ const ShopPage = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
         {products.map(p => (
-          <div key={p.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div key={p.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--r)', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow)', transition: 'var(--transition)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-lg)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; }}
+          >
             <div style={{ padding: 24, flex: 1 }}>
               <h3 style={{ margin: '0 0 8px 0', fontSize: 18 }}>{p.name}</h3>
               <p style={{ margin: 0, color: 'var(--muted)', fontSize: 14, lineHeight: 1.5 }}>{p.description}</p>
             </div>
-            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg)' }}>
-              <span style={{ fontWeight: 600, fontSize: 16 }}>${p.price.toFixed(2)}</span>
+            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--blush)' }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: 'var(--ink)' }}>${p.price.toFixed(2)}</span>
               <button onClick={() => handleBook(p.id)} className="btn btn-primary btn-sm">
                 Book Now
               </button>
