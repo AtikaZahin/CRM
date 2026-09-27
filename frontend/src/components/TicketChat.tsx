@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { API_URL, WS_URL } from '../config';
 
 interface TicketChatProps {
   ticketId: number;
@@ -30,8 +31,8 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
 
   const historyUrl =
     portalType === 'customer'
-      ? `http://localhost:8000/customer/tickets/${ticketId}/messages`
-      : `http://localhost:8000/tickets/${ticketId}/messages`;
+      ? `${API_URL}/customer/tickets/${ticketId}/messages`
+      : `${API_URL}/tickets/${ticketId}/messages`;
 
   useEffect(() => {
     let isSubscribed = true;
@@ -56,7 +57,8 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
     let ws: WebSocket | null = null;
     
     const connectWs = () => {
-      ws = new WebSocket(`ws://localhost:8000/ws/tickets/${ticketId}?token=${token}`);
+      ws = new WebSocket(`${WS_URL}/ws/tickets/${ticketId}?token=${token}`);
+
       wsRef.current = ws;
 
       ws.onopen = () => {

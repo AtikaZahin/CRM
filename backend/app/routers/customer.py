@@ -139,17 +139,17 @@ def _build_customer_ticket(ticket: Ticket, db: Session) -> CustomerTicketRespons
         if employee and employee.name:
             agent_first_name = employee.name.split()[0]
     return CustomerTicketResponse(
-        id=ticket.id,
-        order_id=ticket.order_id,
-        customer_id=ticket.customer_id,
-        subject=ticket.subject,
-        category=ticket.category,
-        status=ticket.status,
+        id=ticket.id,  # type: ignore[arg-type]
+        order_id=ticket.order_id,  # type: ignore[arg-type]
+        customer_id=ticket.customer_id,  # type: ignore[arg-type]
+        subject=ticket.subject,  # type: ignore[arg-type]
+        category=ticket.category,  # type: ignore[arg-type]
+        status=ticket.status,  # type: ignore[arg-type]
         agent_first_name=agent_first_name,
-        rating=ticket.rating,
-        rated_at=ticket.rated_at,
-        created_at=ticket.created_at,
-        updated_at=ticket.updated_at,
+        rating=ticket.rating,  # type: ignore[arg-type]
+        rated_at=ticket.rated_at,  # type: ignore[arg-type]
+        created_at=ticket.created_at,  # type: ignore[arg-type]
+        updated_at=ticket.updated_at,  # type: ignore[arg-type]
     )
 
 
@@ -239,12 +239,12 @@ def get_customer_ticket_messages(
             staff = db.query(User).filter(User.id == msg.sender_id).first()
             sender_name = staff.name.split()[0] if staff and staff.name else "Agent"
         result.append(CustomerMessageResponse(
-            id=msg.id,
-            ticket_id=msg.ticket_id,
-            sender_type=msg.sender_type,
+            id=msg.id,  # type: ignore[arg-type]
+            ticket_id=msg.ticket_id,  # type: ignore[arg-type]
+            sender_type=msg.sender_type,  # type: ignore[arg-type]
             sender_name=sender_name,
-            content=msg.content,
-            created_at=msg.created_at,
+            content=msg.content,  # type: ignore[arg-type]
+            created_at=msg.created_at,  # type: ignore[arg-type]
         ))
     return result
 

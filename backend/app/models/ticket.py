@@ -2,7 +2,12 @@ import datetime
 from sqlalchemy import Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.base import Base
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.customer import Customer
+    from app.models.order import Order
+    from app.models.user import User
 
 class Ticket(Base):
     __tablename__ = "tickets"
@@ -11,8 +16,8 @@ class Ticket(Base):
     order_id: Mapped[int] = mapped_column(Integer, ForeignKey("orders.id"), nullable=False)
     customer_id: Mapped[int] = mapped_column(Integer, ForeignKey("customers.id"), nullable=False)
     subject: Mapped[str] = mapped_column(String, nullable=False)
-    category: Mapped[str] = mapped_column(String, nullable=False, default="OTHER")
-    status: Mapped[str] = mapped_column(String, nullable=False, default="OPEN") # OPEN, IN_PROGRESS, RESOLVED
+    category: Mapped[str] = mapped_column(String, nullable=False, default=str("OTHER"))
+    status: Mapped[str] = mapped_column(String, nullable=False, default=str("OPEN")) # OPEN, IN_PROGRESS, RESOLVED
     assigned_employee_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     assigned_by_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     rating: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # 1-5 stars, set after RESOLVED

@@ -71,7 +71,7 @@ def cancel_customer_order(
     if not order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
 
-    if order.status != "PLACED":
+    if str(order.status) != "PLACED":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only orders with status PLACED can be cancelled")
 
     order.status = "CANCELLED"
@@ -100,7 +100,7 @@ def update_order_status(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
 
     new_status = payload.status.upper()
-    allowed_next = VALID_TRANSITIONS.get(order.status, [])
+    allowed_next = VALID_TRANSITIONS.get(str(order.status), [])
     if new_status not in allowed_next:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

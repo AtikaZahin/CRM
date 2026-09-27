@@ -1,7 +1,12 @@
 import datetime
+from typing import TYPE_CHECKING
 from sqlalchemy import Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.base import Base
+
+if TYPE_CHECKING:
+    from app.models.customer import Customer
+    from app.models.product import Product
 
 class Order(Base):
     __tablename__ = "orders"
@@ -10,7 +15,7 @@ class Order(Base):
     customer_id: Mapped[int] = mapped_column(Integer, ForeignKey("customers.id"), nullable=False)
     product_id: Mapped[int] = mapped_column(Integer, ForeignKey("products.id"), nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    status: Mapped[str] = mapped_column(String, nullable=False, default="PLACED")
+    status: Mapped[str] = mapped_column(String, nullable=False, default=str("PLACED"))
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime, default=datetime.datetime.utcnow
     )

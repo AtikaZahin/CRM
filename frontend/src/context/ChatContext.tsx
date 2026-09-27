@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config';
 
 interface Message {
   role: 'user' | 'agent';
@@ -33,7 +34,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
     
     try {
-      const response = await axios.post('http://localhost:8000/ai/chat', { message: msg });
+      const response = await axios.post(`${API_URL}/ai/chat`, { message: msg });
       setMessages(prev => [...prev, { role: 'agent', content: response.data.response }]);
     } catch (error) {
       console.error('Error sending message:', error);

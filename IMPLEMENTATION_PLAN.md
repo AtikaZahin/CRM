@@ -515,170 +515,355 @@ What to do:
 - Update the Postman/Insomnia collections in `docs/` to the new endpoints.
 
 ---
-Phase 8 – Customer side completion
+
+## Phase 8 – Customer side completion
 
 Decisions (locked):
 
-Booking: direct "Book now" (quantity + confirm). No cart and no online payment; show "Pay on delivery".
-Order status: PLACED → SHIPPED → DELIVERED, or PLACED → CANCELLED.
-Staff may change the status of an order only if that order has a ticket they can write to (the assigned employee, that employee's lead) – or if they are the ADMIN.
-The customer may cancel their own order only while it is PLACED.
-One open ticket per order: while an order has a ticket that is not RESOLVED, a new ticket on it is refused, and the UI shows "View conversation" instead of "Need help?".
-Issue category is required when opening a ticket: DAMAGED, LATE_DELIVERY, WRONG_ITEM, CANCEL_REFUND, OTHER. The subject becomes optional.
-Staff privacy: a customer only ever sees the helping staff member's first name, never their email, phone, or role.
-My account: a customer can edit their name and phone and change their password. Email is fixed.
-Rating: after a ticket is resolved, the customer can rate it 1–5 stars, once.
+- **Booking:** direct "Book now" (quantity + confirm). No cart and no online payment; show "Pay on delivery".
+- **Order status:** `PLACED → SHIPPED → DELIVERED`, or `PLACED → CANCELLED`.
+  - Staff may change the status of an order only if that order has a ticket they can write to (the assigned employee, that employee's lead) – or if they are the ADMIN.
+  - The customer may cancel their own order only while it is `PLACED`.
+- **One open ticket per order:** while an order has a ticket that is not `RESOLVED`, a new ticket on it is refused, and the UI shows "View conversation" instead of "Need help?".
+- **Issue category** is required when opening a ticket: `DAMAGED`, `LATE_DELIVERY`, `WRONG_ITEM`, `CANCEL_REFUND`, `OTHER`. The subject becomes optional.
+- **Staff privacy:** a customer only ever sees the helping staff member's **first name**, never their email, phone, or role.
+- **My account:** a customer can edit their name and phone and change their password. Email is fixed.
+- **Rating:** after a ticket is resolved, the customer can rate it 1–5 stars, once.
 
-Schema changes in this phase (tickets.category, tickets.rating) → run reset + seed after Tasks 8.3 and 8.6.
+Schema changes in this phase (`tickets.category`, `tickets.rating`) → run reset + seed after Tasks 8.3 and 8.6.
 
-[x] Task 8.0 – Fix customer login (token interceptor bug)
+### [x] Task 8.0 – Fix customer login (token interceptor bug)
 
-Bug: frontend/src/services/api.ts attaches staff_token to every request and overwrites the customer token that pages pass explicitly. If a staff member has logged in on the same browser, /customer/me receives a staff token → 401 → the customer is logged out immediately.
+**Bug:** `frontend/src/services/api.ts` attaches `staff_token` to *every* request and overwrites the customer token that pages pass explicitly. If a staff member has logged in on the same browser, `/customer/me` receives a staff token → 401 → the customer is logged out immediately.
 
 What to do:
 
-In the request interceptor, attach staff_token only if the request does not already have an Authorization header.
-In the response interceptor, remove the line that deletes the old token key.
-RegisterPage.tsx: remove the unused import of ../context/AuthContext (that file no longer exists).
+- In the request interceptor, attach `staff_token` only if the request does not already have an `Authorization` header.
+- In the response interceptor, remove the line that deletes the old `token` key.
+- `RegisterPage.tsx`: remove the unused import of `../context/AuthContext` (that file no longer exists).
 
 Done when:
 
-Log in as a staff member, then (same browser, other tab) register and log in as a new customer. The customer reaches /shop/orders, and both sessions keep working.
-[x] Task 8.1 – Input validation
+- Log in as a staff member, then (same browser, other tab) register and log in as a new customer. The customer reaches `/shop/orders`, and both sessions keep working.
 
-Backend (Pydantic, with Field constraints):
+### [x] Task 8.1 – Input validation
 
-OrderCreate.quantity: 1–10.
-Customer register: name 1–80 chars, phone max 20, password min 8.
-Ticket: subject max 120 (optional after 8.3), first message 1–2000.
-Chat messages (REST and WebSocket): content 1–2000 after trimming whitespace.
+Backend (Pydantic, with `Field` constraints):
+
+- `OrderCreate.quantity`: 1–10.
+- Customer register: `name` 1–80 chars, `phone` max 20, `password` min 8.
+- Ticket: `subject` max 120 (optional after 8.3), first message 1–2000.
+- Chat messages (REST and WebSocket): content 1–2000 after trimming whitespace.
 
 Frontend:
 
-Mirror these limits on the inputs (min, max, maxLength) so users see errors early. The backend check is still the real one.
+- Mirror these limits on the inputs (`min`, `max`, `maxLength`) so users see errors early. The backend check is still the real one.
 
 Done when:
 
-POST /orders with quantity: 0, -5, or 1000 → 422.
-An empty or whitespace-only chat message is rejected, over both REST and WebSocket.
-[x] Task 8.2 – Order status lifecycle
+- `POST /orders` with `quantity: 0`, `-5`, or `1000` → 422.
+- An empty or whitespace-only chat message is rejected, over both REST and WebSocket.
+
+### [x] Task 8.2 – Order status lifecycle
 
 Backend:
 
-PATCH /orders/{id}/status (staff). Body: status.
-Allowed transitions only: PLACED→SHIPPED, SHIPPED→DELIVERED, PLACED→CANCELLED. Anything else → 400.
-Permission: ADMIN, or a staff member with write access (via can_access_ticket) to at least one ticket on this order. Otherwise → 404.
-POST /orders/{id}/cancel (customer). Only for their own order (else 404), and only while it is PLACED (else 400).
+- `PATCH /orders/{id}/status` (staff). Body: `status`.
+  - Allowed transitions only: `PLACED→SHIPPED`, `SHIPPED→DELIVERED`, `PLACED→CANCELLED`. Anything else → 400.
+  - Permission: ADMIN, or a staff member with **write** access (via `can_access_ticket`) to at least one ticket on this order. Otherwise → 404.
+- `POST /orders/{id}/cancel` (customer). Only for their own order (else 404), and only while it is `PLACED` (else 400).
 
 Frontend:
 
-Customer Management → order rows get a status dropdown showing only the valid next statuses.
-The customer's "My orders" page shows the status and, while PLACED, a "Cancel order" button with ConfirmModal.
+- Customer Management → order rows get a status dropdown showing only the valid next statuses.
+- The customer's "My orders" page shows the status and, while `PLACED`, a "Cancel order" button with `ConfirmModal`.
 
 Done when (dry run):
 
-With Priya's ticket assigned to Ravi, Ravi moves her order to SHIPPED.
-Arjun gets 404 on the same order.
-Priya cannot cancel it anymore (not PLACED).
-Moving DELIVERED → PLACED → 400.
-[x] Task 8.3 – One open ticket per order + issue category
+1. With Priya's ticket assigned to Ravi, Ravi moves her order to `SHIPPED`.
+2. Arjun gets 404 on the same order.
+3. Priya cannot cancel it anymore (not `PLACED`).
+4. Moving `DELIVERED → PLACED` → 400.
+
+### [x] Task 8.3 – One open ticket per order + issue category
 
 Backend:
 
-Add category to the Ticket model and schemas (the enum values above; required on create).
-subject becomes optional. When empty, store the category's readable label ("Damaged item", etc.).
-POST /customer/tickets: if the order already has a ticket whose status is not RESOLVED → 409 with detail "An open ticket already exists for this order" and that ticket's id.
-GET /orders/me: include open_ticket_id (or null) for each order.
+- Add `category` to the `Ticket` model and schemas (the enum values above; required on create).
+  - `subject` becomes optional. When empty, store the category's readable label ("Damaged item", etc.).
+- `POST /customer/tickets`: if the order already has a ticket whose status is not `RESOLVED` → 409 with detail `"An open ticket already exists for this order"` and that ticket's id.
+- `GET /orders/me`: include `open_ticket_id` (or null) for each order.
 
 Frontend:
 
-Customer "My orders": if open_ticket_id is set, show "View conversation" (opens that ticket). Otherwise show "Need help?", which opens a form with the category dropdown, optional subject, and message.
-Staff Support page: show the category as a badge in every ticket list, especially Unassigned.
+- Customer "My orders": if `open_ticket_id` is set, show "View conversation" (opens that ticket). Otherwise show "Need help?", which opens a form with the category dropdown, optional subject, and message.
+- Staff Support page: show the category as a badge in every ticket list, especially Unassigned.
 
 Done when:
 
-Priya's second "Need help?" on the same open order → 409, and the UI shows "View conversation" instead.
-After Ravi resolves the ticket, Priya can open a new one on that order.
-[x] Task 8.4 – What the customer sees about staff
+- Priya's second "Need help?" on the same open order → 409, and the UI shows "View conversation" instead.
+- After Ravi resolves the ticket, Priya can open a new one on that order.
+
+### [x] Task 8.4 – What the customer sees about staff
 
 Backend:
 
-Customer ticket responses include agent_first_name (the first word of the assigned employee's name, or null). No other staff fields.
-The message list and WebSocket payloads include sender_name:
-the first name for staff,
-the customer's name for the customer.
-Computed on the server, never taken from the client.
-Customer-facing responses must not include assigned_employee_id, assigned_by_id, or staff sender_id. Use a separate CustomerTicketResponse schema.
+- Customer ticket responses include `agent_first_name` (the first word of the assigned employee's name, or null). No other staff fields.
+- The message list and WebSocket payloads include `sender_name`:
+  - the first name for staff,
+  - the customer's name for the customer.
+  - Computed on the server, never taken from the client.
+- Customer-facing responses must not include `assigned_employee_id`, `assigned_by_id`, or staff `sender_id`. Use a separate `CustomerTicketResponse` schema.
 
 Frontend:
 
-The customer ticket list shows "Ravi is helping you", or "Waiting for an agent" when unassigned.
-TicketChat shows sender_name on each message.
+- The customer ticket list shows "Ravi is helping you", or "Waiting for an agent" when unassigned.
+- `TicketChat` shows `sender_name` on each message.
 
 Done when:
 
-In the browser Network tab, no customer-side response contains a staff email or staff id.
-[x] Task 8.5 – Customer "My account"
+- In the browser Network tab, no customer-side response contains a staff email or staff id.
+
+### [x] Task 8.5 – Customer "My account"
 
 Backend:
 
-PATCH /customer/me: only name and phone (same limits as 8.1). Any other field is ignored.
-POST /customer/me/password: body current_password, new_password (min 8).
-A wrong current password → 400.
+- `PATCH /customer/me`: only `name` and `phone` (same limits as 8.1). Any other field is ignored.
+- `POST /customer/me/password`: body `current_password`, `new_password` (min 8).
+  - A wrong current password → 400.
 
 Frontend:
 
-A /shop/account page (protected) with a profile form and a change-password form.
-Add a link to it in CustomerLayout.
+- A `/shop/account` page (protected) with a profile form and a change-password form.
+- Add a link to it in `CustomerLayout`.
 
 Done when:
 
-Priya changes her phone number.
-PATCH /customer/me with {"email": "x@y.com"} leaves her email unchanged.
-After a password change, the old password no longer logs in.
-[x] Task 8.6 – Rating after resolve
+- Priya changes her phone number.
+- `PATCH /customer/me` with `{"email": "x@y.com"}` leaves her email unchanged.
+- After a password change, the old password no longer logs in.
+
+### [x] Task 8.6 – Rating after resolve
 
 Backend:
 
-Add rating (int 1–5, nullable) and rated_at to Ticket.
-POST /customer/tickets/{id}/rate, body rating.
-Own ticket only (else 404).
-Only when RESOLVED (else 400).
-Only once (else 409).
-GET /dashboard adds avg_rating and rated_count:
-ADMIN: all tickets.
-LEAD: their team's tickets.
-EMPLOYEE: their own tickets.
+- Add `rating` (int 1–5, nullable) and `rated_at` to `Ticket`.
+- `POST /customer/tickets/{id}/rate`, body `rating`.
+  - Own ticket only (else 404).
+  - Only when `RESOLVED` (else 400).
+  - Only once (else 409).
+- `GET /dashboard` adds `avg_rating` and `rated_count`:
+  - ADMIN: all tickets.
+  - LEAD: their team's tickets.
+  - EMPLOYEE: their own tickets.
 
 Frontend:
 
-Resolved tickets in the customer portal show 1–5 stars until rated, then show the given rating.
-The staff dashboard shows an "Avg rating" StatCard.
+- Resolved tickets in the customer portal show 1–5 stars until rated, then show the given rating.
+- The staff dashboard shows an "Avg rating" `StatCard`.
 
 Done when:
 
-Priya rates her resolved ticket 4.
-Rating it again → 409.
-Anita's dashboard shows an average of 4.0 from 1 rating.
-[x] Task 8.7 – Full customer dry run
+- Priya rates her resolved ticket 4.
+- Rating it again → 409.
+- Anita's dashboard shows an average of 4.0 from 1 rating.
+
+### [x] Task 8.7 – Full customer dry run
 
 Reset + seed, then in two browser windows (one normal, one incognito):
 
-Priya registers, books 2 headphones, and opens a "Damaged item" ticket.
-Anita assigns the ticket to Ravi.
-Priya sees "Ravi is helping you".
-Priya and Ravi chat live.
-Ravi marks the order SHIPPED, then resolves the ticket.
-Priya rates it.
-Priya opens a new ticket on the same order – allowed, since the old one is resolved.
+1. Priya registers, books 2 headphones, and opens a "Damaged item" ticket.
+2. Anita assigns the ticket to Ravi.
+3. Priya sees "Ravi is helping you".
+4. Priya and Ravi chat live.
+5. Ravi marks the order `SHIPPED`, then resolves the ticket.
+6. Priya rates it.
+7. Priya opens a new ticket on the same order – allowed, since the old one is resolved.
 
-Fix anything that breaks, then update README.md with the customer-side flow.
+Fix anything that breaks, then update `README.md` with the customer-side flow.
 
-Later (not now)
-The AI agent returns as a support assistant: it summarizes a ticket's chat or suggests a reply, and the employee approves before anything is sent.
-Escalation from employee to lead.
-Unread message badges.
-Cart and online payment for the shop.
-Audit log of admin actions.
-Alembic migrations instead of reset scripts.
+---
 
+## Phase 9 – Deployment (Vercel + Render + Supabase)
+
+Target setup (locked):
+
+| Part | Host | Why |
+|---|---|---|
+| Frontend (React/Vite) | **Vercel** | Free static hosting with HTTPS. |
+| Backend (FastAPI + WebSockets) | **Render** (Web Service) | Vercel's serverless functions cannot keep WebSocket connections open, so the backend must not go on Vercel. |
+| Database | **Supabase Postgres** (unchanged) | Render's free disk is wiped on every restart/deploy, so a SQLite file on the server would lose all data. |
+
+SQLite is **not** used on the server. Offline data lives in the user's browser (Phase 10).
+
+### [x] Task 9.1 – Remove hardcoded localhost URLs
+
+What to do:
+
+- Frontend: create `frontend/src/config.ts` exporting:
+  - `API_URL` = `import.meta.env.VITE_API_URL` (default `http://localhost:8000`),
+  - `WS_URL` = `API_URL` with `http` → `ws` and `https` → `wss`.
+- Use these in `services/api.ts` and `components/TicketChat.tsx` (both the history URL and the WebSocket URL). `TicketChat` should use the shared `api` instance instead of raw `axios`.
+- `context/ChatContext.tsx`: the AI chat is disabled, so either remove this file or make it use `API_URL`.
+- Add `frontend/.env.example` with `VITE_API_URL=http://localhost:8000`.
+- Backend `routers/oauth.py`: it is unregistered – leave it, but read the redirect URI from an env variable instead of `localhost`.
+
+Done when:
+
+- `git grep -n "localhost:8000" frontend/src` only shows the default in `config.ts`.
+- The app still works locally with no `.env` file.
+
+### [x] Task 9.2 – Backend ready for Render
+
+What to do:
+
+- Pin versions in `backend/requirements.txt` (run `pip freeze` in a working venv and keep only the needed packages).
+- Add `backend/render.yaml` (or document the dashboard settings in the README):
+  - Root directory: `backend`
+  - Build command: `pip install -r requirements.txt`
+  - Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Add `GET /health` returning `{"status": "ok"}` (no database access) for Render's health check.
+- `FRONTEND_ORIGINS` must accept a comma-separated list, trimmed of spaces (e.g. `http://localhost:5173,https://your-app.vercel.app`).
+- Make sure the database URL is the Supabase **pooler** URL (Render has no IPv6, and Supabase's direct connection is IPv6-only).
+
+Done when:
+
+- Running the start command locally with `PORT=8000` works.
+- `/health` responds without touching the DB.
+
+### [x] Task 9.3 – Frontend ready for Vercel
+
+What to do:
+
+- Add `frontend/vercel.json` with a rewrite of all paths to `/index.html`, so refreshing `/staff/dashboard` or `/shop/orders` does not give a 404.
+- Make sure `npm run build` passes with zero TypeScript errors (Vercel fails the deploy on any error).
+
+Done when:
+
+- `npm run build && npm run preview` works, and refreshing a deep link loads the page.
+
+### [ ] Task 9.4 – Deploy (do this yourself, not the AI)
+
+1. **Supabase:** confirm the password was rotated (Task 0.1). Copy the **Session pooler** connection string.
+2. **Render:** New → Web Service → connect the GitHub repo → branch `redesign`, root `backend`. Environment variables:
+   - `DATABASE_URL` = the pooler string,
+   - `SECRET_KEY` = a new random value (`python -c "import secrets; print(secrets.token_urlsafe(48))"`), different from your local one,
+   - `FRONTEND_ORIGINS` = filled in after step 3.
+3. **Vercel:** New Project → same repo → root `frontend`, framework Vite. Environment variable `VITE_API_URL` = your Render URL (`https://<name>.onrender.com`, no trailing slash).
+4. Go back to Render and set `FRONTEND_ORIGINS` = your Vercel URL. Redeploy.
+5. **Seed once**, from your laptop: set `DATABASE_URL` in `backend/.env` to the Supabase pooler string and run `python -m scripts.seed_db`. Never run `reset_db` against the deployed database after the demo data is set up.
+
+Done when (on the live URLs, two browsers):
+
+- Staff login and customer login both work.
+- Priya → Anita assigns → Ravi: live chat works (the WebSocket uses `wss://`).
+- Refreshing any page works.
+
+### Demo-day checklist
+
+- Render's free tier **sleeps after ~15 minutes idle**, and the first request then takes about a minute. Open the backend `/health` URL 5 minutes before presenting.
+- Supabase's free tier **pauses a project after about a week of no activity**. Log in to the Supabase dashboard a day before the demo to check it is active.
+- Keep a local fallback ready (Phase 10, Task 10.5) in case the venue's internet fails.
+
+---
+
+## Phase 10 – Offline read-only mode
+
+Decisions (locked):
+
+- When the network is down, users can **view** what they last saw: tickets, chat history, orders, customers, announcements, dashboard numbers.
+- **Nothing can be changed offline:** Send, Assign, Resolve, Book, Cancel, Rate, and all edit/create/delete buttons are disabled, with a tooltip "Unavailable offline".
+- No offline chat, no queued actions, no sync-back.
+- Storage: browser **IndexedDB** via **Dexie.js** (the browser's local database; a normal SQLite file can't be used from a website).
+- The app itself is cached by a **service worker** (`vite-plugin-pwa`), so the deployed site opens without internet after at least one online visit.
+
+Cache limits:
+
+| Data | Keep |
+|---|---|
+| Open / in-progress tickets | All, with the newest 200 messages each |
+| Resolved tickets | Only from the last 14 days, max 30 |
+| Announcements | Newest 20 |
+| Orders | Newest 50 |
+| Customers (staff only) | Only those linked to cached tickets |
+| Dashboard stats | The latest response only |
+
+Security rules:
+
+- One cache per logged-in account (key includes `staff:<id>` or `customer:<id>`).
+- Logout deletes that account's whole cache.
+- A cache older than 7 days is deleted and not shown.
+- Only responses the server returned to this user are cached – the cache never bypasses permissions.
+
+### [ ] Task 10.1 – Service worker (app loads offline)
+
+- Add `vite-plugin-pwa` (a version compatible with this project's Vite version) with `registerType: 'autoUpdate'`.
+- Precache the built app files (JS, CSS, HTML, icons) only.
+- **Do not** let the service worker cache API responses or anything containing tokens – API data goes only into IndexedDB (Task 10.2).
+- Add a minimal `manifest` (name, icons, theme colour).
+
+Done when:
+
+- On the deployed site: visit once online, turn the network off in DevTools (Network → Offline), reload – the app shell loads.
+
+### [ ] Task 10.2 – Local cache layer
+
+- Add `dexie`. Create `frontend/src/offline/db.ts` with tables: `tickets`, `messages`, `orders`, `customers`, `announcements`, `meta` (for `owner_key`, `last_synced_at`, dashboard JSON).
+- Create `frontend/src/offline/cache.ts` with:
+  - `saveX(ownerKey, data)` / `loadX(ownerKey)` for each type,
+  - `prune(ownerKey)` applying the limits table,
+  - `clearOwner(ownerKey)`,
+  - `isExpired(ownerKey)` (older than 7 days).
+- Call `clearOwner` from both `logout` functions (staff and customer).
+
+Done when:
+
+- A unit-style check in the browser console: save 60 orders, prune, 50 remain.
+
+### [ ] Task 10.3 – Online/offline detection
+
+- Create `useOnlineStatus()`, based on `navigator.onLine` plus `online`/`offline` events. Also treat a network error from `api` (no response at all) as offline.
+  - Must not treat a 401/403/404/500 as offline – only "no response".
+- A banner in both layouts: "You're offline – showing data from <time>".
+- Export `isOffline` from a small context so pages can disable buttons.
+
+### [ ] Task 10.4 – Pages read and write the cache
+
+For each page (Announcements, Dashboard, Support + TicketChat, Customers, customer Orders, customer Tickets):
+
+- **Online:** fetch from the API as now, then save the result into the cache and run `prune`.
+- **Offline, or the request fails with no response:** load from the cache for the current owner key.
+- If there is nothing cached: show "Not available offline yet – open this page once while online".
+- `TicketChat` offline: show cached messages, hide the input box, and do not open a WebSocket. When the network returns: reconnect and reload history.
+- Disable all action buttons while offline.
+
+Done when (dry run on the deployed site):
+
+1. Log in as Ravi, open Support and two tickets, open Customers.
+2. DevTools → Network → Offline, then reload.
+3. Ravi still sees his tickets and both chats; Send and Resolve are disabled.
+4. Go back online: the banner disappears and new messages load.
+5. Log out, log in as Meena while offline → she sees nothing of Ravi's.
+
+### [ ] Task 10.5 – Local fallback backend (for a venue with no internet)
+
+This is a backup for the demo only, not used in production.
+
+- `backend/app/database/connection.py`: if `DATABASE_URL` starts with `sqlite`, pass `connect_args={"check_same_thread": False}`.
+- Document in the README: set `DATABASE_URL=sqlite:///./local_demo.db`, run reset + seed, run the backend and `npm run dev` locally.
+- Check that every model works on SQLite (the atomic assign in Task 4.1 must still work).
+
+Done when:
+
+- With Wi-Fi turned off, the full Priya → Anita → Ravi flow works on `localhost`.
+
+---
+
+## Later (not now)
+
+- The AI agent returns as a support assistant: it summarizes a ticket's chat or suggests a reply, and the employee approves before anything is sent.
+- Escalation from employee to lead.
+- Unread message badges.
+- Cart and online payment for the shop.
+- Audit log of admin actions.
+- Alembic migrations instead of reset scripts.

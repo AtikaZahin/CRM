@@ -7,7 +7,8 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-origins = os.environ.get("FRONTEND_ORIGINS", "http://localhost:5173").split(",")
+raw_origins = os.environ.get("FRONTEND_ORIGINS", "http://localhost:5173")
+origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,8 +37,14 @@ Base.metadata.create_all(bind=engine)
 def read_root():
     return {"message": "Welcome to the Capstone API"}
 
-from app.routers import auth, deals, staff, customer, customers, products, orders, tickets, websockets, announcements, dashboard
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+
+from app.routers import auth, oauth, deals, staff, customer, customers, products, orders, tickets, websockets, announcements, dashboard
 app.include_router(auth.router)
+app.include_router(oauth.router)
 app.include_router(deals.router)
 app.include_router(staff.router)
 app.include_router(customer.router)

@@ -1,5 +1,6 @@
 import os
 import json
+from typing import Optional
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from google_auth_oauthlib.flow import Flow
@@ -7,6 +8,10 @@ from dotenv import load_dotenv
 
 env_path = os.path.join(os.path.dirname(__file__), "../../.env")
 load_dotenv(dotenv_path=env_path)
+
+# Allow HTTP for local development (OAuthLib requirement)
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 router = APIRouter(tags=["OAuth"])
 
 # Global dictionary to temporarily store the OAuth Flow objects (for development/single-worker)
@@ -24,6 +29,7 @@ def get_client_config():
     if not client_id or not client_secret:
         return None
         
+    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback")
     return {
         "web": {
             "client_id": client_id,
@@ -32,7 +38,7 @@ def get_client_config():
             "token_uri": "https://oauth2.googleapis.com/token",
             "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
             "client_secret": client_secret,
-            "redirect_uris": ["http://localhost:8000/auth/google/callback"]
+            "redirect_uris": [redirect_uri]
         }
     }
 
@@ -42,10 +48,11 @@ def google_login():
     if not config:
         return {"error": "GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not set in backend/.env"}
         
+    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback")
     flow = Flow.from_client_config(
         config,
         scopes=SCOPES,
-        redirect_uri="http://localhost:8000/auth/google/callback"
+        redirect_uri=redirect_uri
     )
     
     authorization_url, state = flow.authorization_url(
@@ -61,7 +68,12 @@ def google_login():
 
 
 @router.get("/auth/google/callback")
-def google_callback(request: Request, state: str = None, code: str = None, error: str = None):
+def google_callback(
+    request: Request,
+    state: Optional[str] = None,
+    code: Optional[str] = None,
+    error: Optional[str] = None
+):
     if error:
         return {"error": f"Authorization failed: {error}"}
     if not code:
@@ -76,10 +88,6 @@ def google_callback(request: Request, state: str = None, code: str = None, error
         
         # We need the full URL to fetch the token
         authorization_response = str(request.url)
-        # Ensure it starts with http (to prevent https mismatch in dev)
-        if authorization_response.startswith('http://'):
-            # In development we might need this because oauthlib enforces https by default
-            os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
             
         flow.fetch_token(authorization_response=authorization_response)
         credentials = flow.credentials
@@ -96,9 +104,11 @@ def google_callback(request: Request, state: str = None, code: str = None, error
         
         # Save it in ai-agent directory
         creds_path = os.path.join(os.path.dirname(__file__), "../../../ai-agent/google_credentials.json")
+        os.makedirs(os.path.dirname(creds_path), exist_ok=True)
         with open(creds_path, 'w') as f:
             json.dump(creds_data, f)
             
         return {"message": "Successfully authenticated with Google! You can close this window and ask the agent to send the email again."}
     except Exception as e:
         return {"error": f"Failed to fetch token: {str(e)}"}
+
