@@ -71,6 +71,27 @@ const CustomersPage = () => {
     }
   };
 
+  const handleOrderStatusChange = async (orderId: number, newStatus: string) => {
+    try {
+      const res = await api.patch(`/orders/${orderId}/status`, { status: newStatus });
+      toast.success('Order status updated');
+      if (selectedCustomer) {
+        setSelectedCustomer({
+          ...selectedCustomer,
+          orders: selectedCustomer.orders.map(o => o.id === orderId ? { ...o, status: res.data.status } : o)
+        });
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Failed to update order status');
+    }
+  };
+
+  const getNextStatuses = (status: string) => {
+    if (status === 'PLACED') return ['SHIPPED', 'CANCELLED'];
+    if (status === 'SHIPPED') return ['DELIVERED'];
+    return [];
+  };
+
   const handleOpenTicket = (ticket: TicketResponse) => {
     // Navigate to support page and pass the ticket in the router state
     navigate('/staff/support', { state: { openTicket: ticket } });
@@ -173,7 +194,27 @@ const CustomersPage = () => {
                           <td>#{o.id}</td>
                           <td>{o.product_id}</td>
                           <td>{o.quantity}</td>
-                          <td>{o.status}</td>
+                          <td>
+                            {getNextStatuses(o.status).length > 0 ? (
+                              <select
+                                className="input"
+                                style={{ padding: '2px 8px', fontSize: 13, minWidth: 120 }}
+                                value={o.status}
+                                onChange={(e) => {
+                                  if (e.target.value !== o.status) {
+                                    handleOrderStatusChange(o.id, e.target.value);
+                                  }
+                                }}
+                              >
+                                <option value={o.status}>{o.status}</option>
+                                {getNextStatuses(o.status).map(st => (
+                                  <option key={st} value={st}>{st}</option>
+                                ))}
+                              </select>
+                            ) : (
+                              <span className="badge badge-gray">{o.status}</span>
+                            )}
+                          </td>
                           <td>{new Date(o.created_at).toLocaleDateString()}</td>
                         </tr>
                       ))}

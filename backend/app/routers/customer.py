@@ -69,12 +69,91 @@ def get_customer_me(current_customer: Customer = Depends(get_current_customer)):
     """Get the currently logged-in customer's details."""
     return current_customer
 
+
+class CustomerProfileUpdate(BaseModel):
+    name: str = None  # type: ignore[assignment]
+    phone: str = None  # type: ignore[assignment]
+
+
+class CustomerPasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.patch("/me", response_model=CustomerResponse)
+def update_customer_me(
+    payload: CustomerProfileUpdate,
+    db: Session = Depends(get_db),
+    current_customer: Customer = Depends(get_current_customer),
+):
+    """Update the customer's own profile. Only name and phone are accepted; any other field is ignored."""
+    if payload.name is not None:
+        name = payload.name.strip()
+        if not name:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Name cannot be blank")
+        if len(name) > 80:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Name cannot exceed 80 characters")
+        current_customer.name = name  # type: ignore[assignment]
+    if payload.phone is not None:
+        phone = payload.phone.strip() if payload.phone else None
+        if phone and len(phone) > 20:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Phone cannot exceed 20 characters")
+        current_customer.phone = phone or None  # type: ignore[assignment]
+    db.commit()
+    db.refresh(current_customer)
+    return current_customer
+
+
+@router.post("/me/password", status_code=status.HTTP_200_OK)
+def change_customer_password(
+    payload: CustomerPasswordChange,
+    db: Session = Depends(get_db),
+    current_customer: Customer = Depends(get_current_customer),
+):
+    """Change the customer's password. Requires the correct current password."""
+    if not verify_password(payload.current_password, cast(str, current_customer.hashed_password)):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        )
+    if len(payload.new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="New password must be at least 8 characters",
+        )
+    current_customer.hashed_password = get_password_hash(payload.new_password)  # type: ignore[assignment]
+    db.commit()
+    return {"message": "Password updated successfully"}
+
 from typing import List
 from app.models.order import Order
 from app.models.ticket import Ticket, Message
-from app.schemas.ticket import TicketCreate, TicketResponse
+from app.models.user import User
+from app.schemas.ticket import TicketCreate, CustomerTicketResponse, CustomerMessageResponse, RateTicketRequest, CATEGORY_LABELS
 
-@router.post("/tickets", response_model=TicketResponse)
+def _build_customer_ticket(ticket: Ticket, db: Session) -> CustomerTicketResponse:
+    """Build a customer-safe ticket response with agent_first_name and rating populated."""
+    agent_first_name = None
+    if ticket.assigned_employee_id:
+        employee = db.query(User).filter(User.id == ticket.assigned_employee_id).first()
+        if employee and employee.name:
+            agent_first_name = employee.name.split()[0]
+    return CustomerTicketResponse(
+        id=ticket.id,
+        order_id=ticket.order_id,
+        customer_id=ticket.customer_id,
+        subject=ticket.subject,
+        category=ticket.category,
+        status=ticket.status,
+        agent_first_name=agent_first_name,
+        rating=ticket.rating,
+        rated_at=ticket.rated_at,
+        created_at=ticket.created_at,
+        updated_at=ticket.updated_at,
+    )
+
+
+@router.post("/tickets", response_model=CustomerTicketResponse)
 def create_customer_ticket(
     payload: TicketCreate,
     db: Session = Depends(get_db),
@@ -85,10 +164,28 @@ def create_customer_ticket(
     if not order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
 
+    # Check for an existing open ticket on this order (status != RESOLVED)
+    existing_ticket = db.query(Ticket).filter(
+        Ticket.order_id == payload.order_id,
+        Ticket.status != "RESOLVED"
+    ).first()
+    if existing_ticket:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"An open ticket already exists for this order (Ticket #{existing_ticket.id})"
+        )
+
+    # Determine subject if empty
+    if payload.subject and payload.subject.strip():
+        subject = payload.subject.strip()
+    else:
+        subject = CATEGORY_LABELS.get(payload.category, "Support Issue")
+
     ticket = Ticket(
         order_id=order.id,
         customer_id=current_customer.id,
-        subject=payload.subject,
+        category=payload.category,
+        subject=subject,
         status="OPEN",
     )
     db.add(ticket)
@@ -103,12 +200,83 @@ def create_customer_ticket(
     db.add(message)
     db.commit()
     db.refresh(ticket)
-    return ticket
+    return _build_customer_ticket(ticket, db)
 
-@router.get("/tickets", response_model=List[TicketResponse])
+
+@router.get("/tickets", response_model=List[CustomerTicketResponse])
 def get_customer_tickets(
     db: Session = Depends(get_db),
     current_customer: Customer = Depends(get_current_customer),
 ):
     """Customer views their tickets."""
-    return db.query(Ticket).filter(Ticket.customer_id == current_customer.id).order_by(Ticket.created_at.desc()).all()
+    tickets = db.query(Ticket).filter(Ticket.customer_id == current_customer.id).order_by(Ticket.created_at.desc()).all()
+    return [_build_customer_ticket(t, db) for t in tickets]
+
+
+@router.get("/tickets/{ticket_id}/messages", response_model=List[CustomerMessageResponse])
+def get_customer_ticket_messages(
+    ticket_id: int,
+    db: Session = Depends(get_db),
+    current_customer: Customer = Depends(get_current_customer),
+):
+    """Customer fetches messages for one of their tickets (sender_name included, sender_id omitted)."""
+    ticket = db.query(Ticket).filter(
+        Ticket.id == ticket_id,
+        Ticket.customer_id == current_customer.id
+    ).first()
+    if not ticket:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
+
+    messages = db.query(Message).filter(Message.ticket_id == ticket_id).order_by(Message.created_at.asc()).all()
+    result = []
+    for msg in messages:
+        if msg.sender_type == "CUSTOMER":
+            # Fetch customer name
+            cust = db.query(Customer).filter(Customer.id == msg.sender_id).first()
+            sender_name = cust.name.split()[0] if cust and cust.name else "Customer"
+        else:
+            # Staff – first name only, no ID
+            staff = db.query(User).filter(User.id == msg.sender_id).first()
+            sender_name = staff.name.split()[0] if staff and staff.name else "Agent"
+        result.append(CustomerMessageResponse(
+            id=msg.id,
+            ticket_id=msg.ticket_id,
+            sender_type=msg.sender_type,
+            sender_name=sender_name,
+            content=msg.content,
+            created_at=msg.created_at,
+        ))
+    return result
+
+
+import datetime as dt
+
+@router.post("/tickets/{ticket_id}/rate", response_model=CustomerTicketResponse)
+def rate_customer_ticket(
+    ticket_id: int,
+    payload: RateTicketRequest,
+    db: Session = Depends(get_db),
+    current_customer: Customer = Depends(get_current_customer),
+):
+    """Customer rates a resolved ticket (1-5 stars). Own ticket only, RESOLVED only, once only."""
+    ticket = db.query(Ticket).filter(
+        Ticket.id == ticket_id,
+        Ticket.customer_id == current_customer.id,
+    ).first()
+    if not ticket:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
+
+    if ticket.status != "RESOLVED":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ticket must be RESOLVED before rating")
+
+    if ticket.rating is not None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ticket has already been rated")
+
+    if not (1 <= payload.rating <= 5):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Rating must be between 1 and 5")
+
+    ticket.rating = payload.rating  # type: ignore[assignment]
+    ticket.rated_at = dt.datetime.utcnow()  # type: ignore[assignment]
+    db.commit()
+    db.refresh(ticket)
+    return _build_customer_ticket(ticket, db)

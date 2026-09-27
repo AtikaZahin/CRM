@@ -515,11 +515,170 @@ What to do:
 - Update the Postman/Insomnia collections in `docs/` to the new endpoints.
 
 ---
+Phase 8 – Customer side completion
 
-## Later (not now)
+Decisions (locked):
 
-- The AI agent returns as a support assistant: it summarizes a ticket's chat or suggests a reply, and the employee approves before anything is sent.
-- Escalation from employee to lead.
-- Unread message badges.
-- Audit log of admin actions.
-- Alembic migrations instead of reset scripts.
+Booking: direct "Book now" (quantity + confirm). No cart and no online payment; show "Pay on delivery".
+Order status: PLACED → SHIPPED → DELIVERED, or PLACED → CANCELLED.
+Staff may change the status of an order only if that order has a ticket they can write to (the assigned employee, that employee's lead) – or if they are the ADMIN.
+The customer may cancel their own order only while it is PLACED.
+One open ticket per order: while an order has a ticket that is not RESOLVED, a new ticket on it is refused, and the UI shows "View conversation" instead of "Need help?".
+Issue category is required when opening a ticket: DAMAGED, LATE_DELIVERY, WRONG_ITEM, CANCEL_REFUND, OTHER. The subject becomes optional.
+Staff privacy: a customer only ever sees the helping staff member's first name, never their email, phone, or role.
+My account: a customer can edit their name and phone and change their password. Email is fixed.
+Rating: after a ticket is resolved, the customer can rate it 1–5 stars, once.
+
+Schema changes in this phase (tickets.category, tickets.rating) → run reset + seed after Tasks 8.3 and 8.6.
+
+[x] Task 8.0 – Fix customer login (token interceptor bug)
+
+Bug: frontend/src/services/api.ts attaches staff_token to every request and overwrites the customer token that pages pass explicitly. If a staff member has logged in on the same browser, /customer/me receives a staff token → 401 → the customer is logged out immediately.
+
+What to do:
+
+In the request interceptor, attach staff_token only if the request does not already have an Authorization header.
+In the response interceptor, remove the line that deletes the old token key.
+RegisterPage.tsx: remove the unused import of ../context/AuthContext (that file no longer exists).
+
+Done when:
+
+Log in as a staff member, then (same browser, other tab) register and log in as a new customer. The customer reaches /shop/orders, and both sessions keep working.
+[x] Task 8.1 – Input validation
+
+Backend (Pydantic, with Field constraints):
+
+OrderCreate.quantity: 1–10.
+Customer register: name 1–80 chars, phone max 20, password min 8.
+Ticket: subject max 120 (optional after 8.3), first message 1–2000.
+Chat messages (REST and WebSocket): content 1–2000 after trimming whitespace.
+
+Frontend:
+
+Mirror these limits on the inputs (min, max, maxLength) so users see errors early. The backend check is still the real one.
+
+Done when:
+
+POST /orders with quantity: 0, -5, or 1000 → 422.
+An empty or whitespace-only chat message is rejected, over both REST and WebSocket.
+[x] Task 8.2 – Order status lifecycle
+
+Backend:
+
+PATCH /orders/{id}/status (staff). Body: status.
+Allowed transitions only: PLACED→SHIPPED, SHIPPED→DELIVERED, PLACED→CANCELLED. Anything else → 400.
+Permission: ADMIN, or a staff member with write access (via can_access_ticket) to at least one ticket on this order. Otherwise → 404.
+POST /orders/{id}/cancel (customer). Only for their own order (else 404), and only while it is PLACED (else 400).
+
+Frontend:
+
+Customer Management → order rows get a status dropdown showing only the valid next statuses.
+The customer's "My orders" page shows the status and, while PLACED, a "Cancel order" button with ConfirmModal.
+
+Done when (dry run):
+
+With Priya's ticket assigned to Ravi, Ravi moves her order to SHIPPED.
+Arjun gets 404 on the same order.
+Priya cannot cancel it anymore (not PLACED).
+Moving DELIVERED → PLACED → 400.
+[x] Task 8.3 – One open ticket per order + issue category
+
+Backend:
+
+Add category to the Ticket model and schemas (the enum values above; required on create).
+subject becomes optional. When empty, store the category's readable label ("Damaged item", etc.).
+POST /customer/tickets: if the order already has a ticket whose status is not RESOLVED → 409 with detail "An open ticket already exists for this order" and that ticket's id.
+GET /orders/me: include open_ticket_id (or null) for each order.
+
+Frontend:
+
+Customer "My orders": if open_ticket_id is set, show "View conversation" (opens that ticket). Otherwise show "Need help?", which opens a form with the category dropdown, optional subject, and message.
+Staff Support page: show the category as a badge in every ticket list, especially Unassigned.
+
+Done when:
+
+Priya's second "Need help?" on the same open order → 409, and the UI shows "View conversation" instead.
+After Ravi resolves the ticket, Priya can open a new one on that order.
+[x] Task 8.4 – What the customer sees about staff
+
+Backend:
+
+Customer ticket responses include agent_first_name (the first word of the assigned employee's name, or null). No other staff fields.
+The message list and WebSocket payloads include sender_name:
+the first name for staff,
+the customer's name for the customer.
+Computed on the server, never taken from the client.
+Customer-facing responses must not include assigned_employee_id, assigned_by_id, or staff sender_id. Use a separate CustomerTicketResponse schema.
+
+Frontend:
+
+The customer ticket list shows "Ravi is helping you", or "Waiting for an agent" when unassigned.
+TicketChat shows sender_name on each message.
+
+Done when:
+
+In the browser Network tab, no customer-side response contains a staff email or staff id.
+[x] Task 8.5 – Customer "My account"
+
+Backend:
+
+PATCH /customer/me: only name and phone (same limits as 8.1). Any other field is ignored.
+POST /customer/me/password: body current_password, new_password (min 8).
+A wrong current password → 400.
+
+Frontend:
+
+A /shop/account page (protected) with a profile form and a change-password form.
+Add a link to it in CustomerLayout.
+
+Done when:
+
+Priya changes her phone number.
+PATCH /customer/me with {"email": "x@y.com"} leaves her email unchanged.
+After a password change, the old password no longer logs in.
+[x] Task 8.6 – Rating after resolve
+
+Backend:
+
+Add rating (int 1–5, nullable) and rated_at to Ticket.
+POST /customer/tickets/{id}/rate, body rating.
+Own ticket only (else 404).
+Only when RESOLVED (else 400).
+Only once (else 409).
+GET /dashboard adds avg_rating and rated_count:
+ADMIN: all tickets.
+LEAD: their team's tickets.
+EMPLOYEE: their own tickets.
+
+Frontend:
+
+Resolved tickets in the customer portal show 1–5 stars until rated, then show the given rating.
+The staff dashboard shows an "Avg rating" StatCard.
+
+Done when:
+
+Priya rates her resolved ticket 4.
+Rating it again → 409.
+Anita's dashboard shows an average of 4.0 from 1 rating.
+[x] Task 8.7 – Full customer dry run
+
+Reset + seed, then in two browser windows (one normal, one incognito):
+
+Priya registers, books 2 headphones, and opens a "Damaged item" ticket.
+Anita assigns the ticket to Ravi.
+Priya sees "Ravi is helping you".
+Priya and Ravi chat live.
+Ravi marks the order SHIPPED, then resolves the ticket.
+Priya rates it.
+Priya opens a new ticket on the same order – allowed, since the old one is resolved.
+
+Fix anything that breaks, then update README.md with the customer-side flow.
+
+Later (not now)
+The AI agent returns as a support assistant: it summarizes a ticket's chat or suggests a reply, and the employee approves before anything is sent.
+Escalation from employee to lead.
+Unread message badges.
+Cart and online payment for the shop.
+Audit log of admin actions.
+Alembic migrations instead of reset scripts.
+

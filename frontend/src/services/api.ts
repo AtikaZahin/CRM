@@ -10,11 +10,11 @@ export const api = axios.create({
   },
 });
 
-// Request Interceptor: Attach JWT Token if it exists
+// Request Interceptor: Attach JWT Token if it exists and not already set
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('staff_token');
-    if (token && config.headers) {
+    if (token && config.headers && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -28,12 +28,6 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Clear token and redirect to login
-      localStorage.removeItem('token');
-      // A full page reload or routing logic will handle sending the user to login
-      // window.location.href = '/login'; 
-    }
     return Promise.reject(error);
   }
 );

@@ -13,7 +13,8 @@ interface Message {
   id: number;
   ticket_id: number;
   sender_type: string;
-  sender_id: number;
+  sender_id?: number;     // only present in staff payloads
+  sender_name?: string;   // populated by server
   content: string;
   created_at: string;
 }
@@ -28,11 +29,19 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeout = useRef<number | null>(null);
 
+  // Choose the correct history endpoint:
+  // - customer portal: /customer/tickets/{id}/messages (no sender_id, has sender_name)
+  // - staff portal:    /tickets/{id}/messages
+  const historyUrl =
+    portalType === 'customer'
+      ? `http://localhost:8000/customer/tickets/${ticketId}/messages`
+      : `http://localhost:8000/tickets/${ticketId}/messages`;
+
   // Load history initially
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/tickets/${ticketId}/messages`, {
+        const res = await axios.get(historyUrl, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setMessages(res.data);
@@ -41,7 +50,7 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
       }
     };
     fetchHistory();
-  }, [ticketId, token]);
+  }, [ticketId, token, historyUrl]);
 
   // Manage WebSocket connection
   useEffect(() => {
@@ -93,15 +102,33 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || isReadOnly) return;
+    const trimmed = newMessage.trim();
+    if (!trimmed || isReadOnly) return;
     
     if (wsRef.current && isConnected) {
-      // Send message text over websocket
-      wsRef.current.send(newMessage);
+      wsRef.current.send(trimmed);
       setNewMessage('');
     } else {
       toast.error('Chat is disconnected. Trying to reconnect...');
     }
+  };
+
+  /**
+   * Determine whether a message "belongs to me" for chat bubble alignment.
+   * - portalType 'customer': my messages have sender_type === 'CUSTOMER'
+   * - portalType 'staff':    my messages have sender_type === 'STAFF'
+   */
+  const isMine = (msg: Message) =>
+    msg.sender_type.toUpperCase() === (portalType === 'customer' ? 'CUSTOMER' : 'STAFF');
+
+  /**
+   * Display label above each bubble.
+   * Prefer server-computed sender_name; fall back gracefully.
+   */
+  const getSenderLabel = (msg: Message): string => {
+    if (msg.sender_name) return msg.sender_name;
+    // Fallback: readable label based on sender_type
+    return msg.sender_type === 'CUSTOMER' ? 'Customer' : 'Agent';
   };
 
   return (
@@ -118,18 +145,19 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
           <div style={{ textAlign: 'center', color: 'var(--muted)', marginTop: 20 }}>No messages yet.</div>
         ) : (
           messages.map(msg => {
-            const isMine = msg.sender_type.toLowerCase() === portalType.toLowerCase();
+            const mine = isMine(msg);
+            const label = getSenderLabel(msg);
             return (
-              <div key={msg.id} style={{ display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start' }}>
+              <div key={msg.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start' }}>
                 <div style={{ 
                   maxWidth: '70%', 
                   padding: '10px 14px', 
                   borderRadius: 12,
-                  background: isMine ? 'var(--accent)' : 'var(--border)',
-                  color: isMine ? '#fff' : 'var(--ink)'
+                  background: mine ? 'var(--accent)' : 'var(--border)',
+                  color: mine ? '#fff' : 'var(--ink)'
                 }}>
-                  <div style={{ fontSize: 11, opacity: 0.8, marginBottom: 4 }}>
-                    {msg.sender_type} - {new Date(msg.created_at).toLocaleTimeString()}
+                  <div style={{ fontSize: 11, opacity: 0.8, marginBottom: 4, fontWeight: 600 }}>
+                    {label} · {new Date(msg.created_at).toLocaleTimeString()}
                   </div>
                   <div style={{ fontSize: 14, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.content}</div>
                 </div>
@@ -149,6 +177,7 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
               placeholder={isConnected ? "Type your message..." : "Connecting..."}
               value={newMessage}
               onChange={e => setNewMessage(e.target.value)}
+              maxLength={2000}
               disabled={!isConnected}
             />
             <button type="submit" className="btn btn-primary" disabled={!isConnected || !newMessage.trim()}>

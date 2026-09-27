@@ -1,13 +1,23 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from typing import Optional
 
 
 class CustomerCreate(BaseModel):
-    name: str
+    name: str = Field(..., min_length=1, max_length=80)
     email: str
-    password: str
-    phone: Optional[str] = None
+    password: str = Field(..., min_length=8)
+    phone: Optional[str] = Field(None, max_length=20)
+
+    @field_validator('name')
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        trimmed = v.strip()
+        if not trimmed:
+            raise ValueError("Name cannot be empty or whitespace only")
+        if len(trimmed) > 80:
+            raise ValueError("Name cannot exceed 80 characters")
+        return trimmed
 
 
 class CustomerResponse(BaseModel):

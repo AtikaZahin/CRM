@@ -2,6 +2,7 @@ import datetime
 from sqlalchemy import Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.base import Base
+from typing import Optional
 
 class Ticket(Base):
     __tablename__ = "tickets"
@@ -10,9 +11,12 @@ class Ticket(Base):
     order_id: Mapped[int] = mapped_column(Integer, ForeignKey("orders.id"), nullable=False)
     customer_id: Mapped[int] = mapped_column(Integer, ForeignKey("customers.id"), nullable=False)
     subject: Mapped[str] = mapped_column(String, nullable=False)
+    category: Mapped[str] = mapped_column(String, nullable=False, default="OTHER")
     status: Mapped[str] = mapped_column(String, nullable=False, default="OPEN") # OPEN, IN_PROGRESS, RESOLVED
     assigned_employee_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     assigned_by_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
+    rating: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # 1-5 stars, set after RESOLVED
+    rated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime, nullable=True)
     
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)

@@ -16,6 +16,21 @@ router = APIRouter(
     tags=["Dashboard"]
 )
 
+
+def _compute_rating_stats(query_filter, db: Session):
+    """Return (avg_rating, rated_count) for tickets matching the given filter."""
+    rated = db.query(
+        func.avg(Ticket.rating),
+        func.count(Ticket.id)
+    ).filter(
+        query_filter,
+        Ticket.rating.isnot(None)
+    ).one()
+    avg = round(float(rated[0]), 2) if rated[0] is not None else None
+    count = rated[1] or 0
+    return avg, count
+
+
 @router.get("", response_model=DashboardStats)
 def get_dashboard_stats(
     db: Session = Depends(get_db),
@@ -29,7 +44,7 @@ def get_dashboard_stats(
         stats.total_employees = db.query(func.count(User.id)).filter(User.role == "EMPLOYEE").scalar()
         stats.total_customers = db.query(func.count(Customer.id)).scalar()
         stats.total_orders = db.query(func.count(Order.id)).scalar()
-        
+
         # Tickets by status
         tickets_by_status: Dict[str, int] = {"OPEN": 0, "IN_PROGRESS": 0, "RESOLVED": 0}
         counts = db.query(Ticket.status, func.count(Ticket.id)).group_by(Ticket.status).all()
@@ -37,10 +52,13 @@ def get_dashboard_stats(
             tickets_by_status[status] = count
         stats.tickets_by_status = tickets_by_status
 
+        # Rating stats: all tickets
+        stats.avg_rating, stats.rated_count = _compute_rating_stats(True, db)
+
     elif current_user.role == "LEAD":
         # team size (number of employees reporting to this lead)
         stats.team_size = db.query(func.count(User.id)).filter(User.lead_id == current_user.id).scalar()
-        
+
         # unassigned ticket count
         stats.unassigned_tickets = db.query(func.count(Ticket.id)).filter(Ticket.assigned_employee_id == None).scalar()
 
@@ -54,9 +72,13 @@ def get_dashboard_stats(
             tickets_by_status[status] = count
         stats.tickets_by_status = tickets_by_status
 
+        # Rating stats: team's tickets only
+        stats.avg_rating, stats.rated_count = _compute_rating_stats(
+            Ticket.assigned_employee_id.in_(team_member_ids), db
+        )
+
     else:
         # EMPLOYEE
-        # my tickets by status
         tickets_by_status: Dict[str, int] = {"OPEN": 0, "IN_PROGRESS": 0, "RESOLVED": 0}
         counts = db.query(Ticket.status, func.count(Ticket.id)).filter(
             Ticket.assigned_employee_id == current_user.id
@@ -64,5 +86,10 @@ def get_dashboard_stats(
         for status, count in counts:
             tickets_by_status[status] = count
         stats.tickets_by_status = tickets_by_status
+
+        # Rating stats: own tickets only
+        stats.avg_rating, stats.rated_count = _compute_rating_stats(
+            Ticket.assigned_employee_id == current_user.id, db
+        )
 
     return stats

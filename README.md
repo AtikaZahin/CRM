@@ -20,12 +20,14 @@ The application implements strict backend-enforced permissions across three staf
 - **LEAD**: Managers of employee teams. Can assign unassigned tickets to their own team members, view their team's tickets, manage their team's customers, and view team-level statistics.
 - **EMPLOYEE**: Standard staff members. Can chat with customers on assigned tickets, resolve tickets, and view their own personal performance statistics.
 
-### Real-Time Support Chat
+### Real-Time Support Chat & Customer Flow
 Built using WebSockets, customers and assigned staff can chat in real-time.
-- Customers can raise a ticket for any of their orders.
-- Unassigned tickets appear to all LEADs, who can assign them to their team members.
-- The chat features dynamic side-by-side bubbles, auto-scroll, and auto-reconnect logic.
-- Resolving a ticket permanently locks the chat to read-only mode for everyone.
+- **Customer Shopping & Orders**: Customers can register, browse available products, book orders, and manage their profile & password in their personal account page.
+- **Support Tickets**: Customers can open support tickets (e.g. Damaged Item, Late Delivery, Cancellation) for their orders. Only one active ticket per order is permitted at a time.
+- **Assignment & Privacy**: Unassigned tickets appear globally to all **LEADs**, who can assign them to their team members. Customer responses are strictly filtered server-side to omit internal staff IDs and emails (showing friendly agent display names such as *"Ravi is helping you"*).
+- **Real-Time Messaging**: The chat features dynamic side-by-side bubbles, auto-scroll, and auto-reconnect logic over WebSockets.
+- **Resolution & Star Rating**: Resolving a ticket permanently locks the chat to read-only mode for everyone. Customers can rate resolved tickets with 1–5 stars. Once resolved, customers are free to open a new ticket on the same order if needed.
+- **Rating Analytics**: Staff dashboards automatically aggregate average ratings and total rated counts scoped by role (Admin sees global, Lead sees team, Employee sees personal).
 
 ## Local Development
 

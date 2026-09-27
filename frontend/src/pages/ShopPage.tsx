@@ -42,8 +42,8 @@ const ShopPage = () => {
     if (!qtyStr) return;
     
     const quantity = parseInt(qtyStr, 10);
-    if (isNaN(quantity) || quantity <= 0) {
-      toast.error('Invalid quantity');
+    if (isNaN(quantity) || quantity < 1 || quantity > 10) {
+      toast.error('Quantity must be between 1 and 10');
       return;
     }
 

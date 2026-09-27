@@ -14,5 +14,8 @@ class DashboardStats(BaseModel):
     unassigned_tickets: Optional[int] = None
     
     # Shared ticket stats (tickets by status: OPEN, IN_PROGRESS, RESOLVED)
-    # Could be represented as a dict or individual fields
     tickets_by_status: Optional[Dict[str, int]] = None
+
+    # Rating stats (scoped per role)
+    avg_rating: Optional[float] = None
+    rated_count: Optional[int] = None

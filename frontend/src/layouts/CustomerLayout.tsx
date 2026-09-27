@@ -20,6 +20,7 @@ const CustomerLayout = () => {
           <Link to="/shop" className="btn btn-ghost btn-sm">Shop</Link>
           {user && <Link to="/shop/orders" className="btn btn-ghost btn-sm">My Orders</Link>}
           {user && <Link to="/shop/tickets" className="btn btn-ghost btn-sm">My Tickets</Link>}
+          {user && <Link to="/shop/account" className="btn btn-ghost btn-sm">My Account</Link>}
         </div>
 
         <div className="row gap-8" style={{ marginLeft: 'auto' }}>

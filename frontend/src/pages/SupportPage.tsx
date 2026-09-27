@@ -9,11 +9,20 @@ interface TicketResponse {
   id: number;
   order_id: number;
   customer_id: number;
+  category?: string;
   subject: string;
   status: string;
   assigned_employee_id: number | null;
   created_at: string;
 }
+
+const CATEGORY_LABELS: Record<string, string> = {
+  DAMAGED: 'Damaged item',
+  LATE_DELIVERY: 'Late delivery',
+  WRONG_ITEM: 'Wrong item received',
+  CANCEL_REFUND: 'Cancellation / Refund',
+  OTHER: 'Other issue',
+};
 
 interface UserItem {
   id: number;
@@ -196,6 +205,7 @@ const SupportPage = () => {
             <thead>
               <tr>
                 <th>Ticket ID</th>
+                <th>Category</th>
                 <th>Subject</th>
                 <th>Customer ID</th>
                 <th>Date</th>
@@ -208,7 +218,7 @@ const SupportPage = () => {
             <tbody>
               {tickets.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--muted)' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: 'var(--muted)' }}>
                     No tickets found in this view.
                   </td>
                 </tr>
@@ -216,6 +226,11 @@ const SupportPage = () => {
                 tickets.map(t => (
                   <tr key={t.id}>
                     <td>#{t.id}</td>
+                    <td>
+                      <span className="badge badge-purple" style={{ fontSize: 11 }}>
+                        {CATEGORY_LABELS[t.category || 'OTHER'] || t.category || 'Other issue'}
+                      </span>
+                    </td>
                     <td style={{ fontWeight: 500 }}>{t.subject}</td>
                     <td>{t.customer_id}</td>
                     <td>{new Date(t.created_at).toLocaleDateString()}</td>
@@ -255,13 +270,35 @@ const SupportPage = () => {
 
       {selectedTicket && token && (
         <Modal isOpen={true} onClose={() => setSelectedTicket(null)} title={`Ticket #${selectedTicket.id}: ${selectedTicket.subject}`}>
-          <div style={{ display: 'flex', flexDirection: 'column', height: 600, marginTop: 16 }}>
-            <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'flex-end' }}>
-              {canResolve(selectedTicket) && (
-                <button onClick={handleResolve} className="btn btn-primary btn-sm">
-                  Mark Resolved
-                </button>
-              )}
+          <div style={{ display: 'flex', flexDirection: 'column', height: 620, marginTop: 16 }}>
+            <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--surface-hover)', borderRadius: 'var(--r-sm)', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 13, color: 'var(--fg)' }}>
+                <strong>Order #{selectedTicket.order_id}</strong>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {canResolve(selectedTicket) && (
+                  <button 
+                    onClick={async () => {
+                      if (!window.confirm(`Are you sure you want to cancel Order #${selectedTicket.order_id}?`)) return;
+                      try {
+                        await api.patch(`/orders/${selectedTicket.order_id}/status`, { status: 'CANCELLED' });
+                        toast.success(`Order #${selectedTicket.order_id} cancelled!`);
+                      } catch (err: any) {
+                        toast.error(err.response?.data?.detail || 'Failed to cancel order');
+                      }
+                    }} 
+                    className="btn btn-outline btn-sm"
+                    style={{ borderColor: 'var(--ember)', color: 'var(--ember)' }}
+                  >
+                    Cancel Order
+                  </button>
+                )}
+                {canResolve(selectedTicket) && (
+                  <button onClick={handleResolve} className="btn btn-primary btn-sm">
+                    Mark Resolved
+                  </button>
+                )}
+              </div>
             </div>
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <TicketChat 

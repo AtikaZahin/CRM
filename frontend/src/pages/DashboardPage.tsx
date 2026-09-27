@@ -15,6 +15,9 @@ interface DashboardStats {
   unassigned_tickets?: number;
   
   tickets_by_status?: Record<string, number>;
+
+  avg_rating?: number | null;
+  rated_count?: number;
 }
 
 const DashboardPage = () => {
@@ -70,6 +73,14 @@ const DashboardPage = () => {
             <StatCard title="Unassigned Tickets" value={tickets['OPEN']?.toString() || '0'} isPositive={false} />
             <StatCard title="In Progress Tickets" value={tickets['IN_PROGRESS']?.toString() || '0'} isPositive={true} />
             <StatCard title="Resolved Tickets" value={tickets['RESOLVED']?.toString() || '0'} isPositive={true} />
+            {stats.rated_count != null && stats.rated_count > 0 && (
+              <StatCard
+                title="Avg Rating"
+                value={`${stats.avg_rating?.toFixed(1) ?? '—'} ★`}
+                trend={`${stats.rated_count} rating${stats.rated_count !== 1 ? 's' : ''}`}
+                isPositive={true}
+              />
+            )}
           </>
         )}
 
@@ -82,6 +93,14 @@ const DashboardPage = () => {
             </div>
             <StatCard title="Team Tickets: In Progress" value={tickets['IN_PROGRESS']?.toString() || '0'} isPositive={true} />
             <StatCard title="Team Tickets: Resolved" value={tickets['RESOLVED']?.toString() || '0'} isPositive={true} />
+            {stats.rated_count != null && stats.rated_count > 0 && (
+              <StatCard
+                title="Avg Rating"
+                value={`${stats.avg_rating?.toFixed(1) ?? '—'} ★`}
+                trend={`${stats.rated_count} rating${stats.rated_count !== 1 ? 's' : ''}`}
+                isPositive={true}
+              />
+            )}
           </>
         )}
 
@@ -90,6 +109,14 @@ const DashboardPage = () => {
           <>
             <StatCard title="My In Progress Tickets" value={tickets['IN_PROGRESS']?.toString() || '0'} isPositive={false} />
             <StatCard title="My Resolved Tickets" value={tickets['RESOLVED']?.toString() || '0'} isPositive={true} />
+            {stats.rated_count != null && stats.rated_count > 0 && (
+              <StatCard
+                title="Avg Rating"
+                value={`${stats.avg_rating?.toFixed(1) ?? '—'} ★`}
+                trend={`${stats.rated_count} rating${stats.rated_count !== 1 ? 's' : ''}`}
+                isPositive={true}
+              />
+            )}
           </>
         )}
       </div>

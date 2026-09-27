@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { api } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -95,6 +94,7 @@ const RegisterPage = () => {
                 className="input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                maxLength={80}
                 required
               />
             </div>
@@ -115,6 +115,7 @@ const RegisterPage = () => {
                 className="input"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                maxLength={20}
               />
             </div>
             <div className="field">
@@ -124,6 +125,7 @@ const RegisterPage = () => {
                 className="input"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                minLength={8}
                 required
               />
             </div>

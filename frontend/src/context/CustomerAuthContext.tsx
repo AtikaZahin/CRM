@@ -15,6 +15,7 @@ interface CustomerAuthContextType {
   token: string | null;
   login: (token: string) => Promise<void>;
   logout: () => void;
+  refreshProfile: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -65,8 +66,12 @@ export const CustomerAuthProvider = ({ children }: { children: ReactNode }) => {
     navigate('/shop/login');
   };
 
+  const refreshProfile = async () => {
+    if (token) await fetchProfile(token);
+  };
+
   return (
-    <CustomerAuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token && !!user, isLoading }}>
+    <CustomerAuthContext.Provider value={{ user, token, login, logout, refreshProfile, isAuthenticated: !!token && !!user, isLoading }}>
       {children}
     </CustomerAuthContext.Provider>
   );

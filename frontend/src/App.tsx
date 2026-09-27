@@ -19,6 +19,7 @@ import CustomerLayout from './layouts/CustomerLayout';
 import ShopPage from './pages/ShopPage';
 import CustomerOrdersPage from './pages/CustomerOrdersPage';
 import CustomerTicketsPage from './pages/CustomerTicketsPage';
+import AccountPage from './pages/AccountPage';
 
 function App() {
   return (
@@ -79,6 +80,7 @@ function App() {
             <Route element={<ProtectedCustomerRoute><Outlet /></ProtectedCustomerRoute>}>
               <Route path="orders" element={<CustomerOrdersPage />} />
               <Route path="tickets" element={<CustomerTicketsPage />} />
+              <Route path="account" element={<AccountPage />} />
               <Route path="dashboard" element={<Navigate to="/shop/orders" replace />} />
             </Route>
             
