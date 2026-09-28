@@ -1,0 +1,564 @@
+/* ─── Capstone CRM · "Orchid" theme ──────────────────────────────────────────
+   Elegant pink → purple → blue. Loaded AFTER global.css (see main.tsx),
+   so everything here overrides the old pink theme without editing global.css.
+   ─────────────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+/* ── Tokens: light ──────────────────────────────────────────────────────── */
+:root,
+html[data-theme='light'] {
+    --grad-brand: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%);
+    --grad-primary: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+
+    --bg: #f7f6fb;
+    --surface: #ffffff;
+    --surface2: #f2f0fa;
+    --blush: #f1edfd;
+    --sage: #eef4ff;
+    --rose: #7c3aed;
+    --rose-dark: #6d28d9;
+    --pink: #db2777;
+    --blue: #2563eb;
+    --ink: #1c1a33;
+    --muted: #6b6887;
+    --border: #e7e4f2;
+    --danger: #e11d48;
+
+    --rose-glow: rgba(124, 58, 237, 0.18);
+
+    --status-open-bg: #fdf2f8;
+    --status-open-color: #be185d;
+    --status-progress-bg: #f3efff;
+    --status-progress-color: #6d28d9;
+    --status-resolved-bg: #ecfdf5;
+    --status-resolved-color: #047857;
+    --status-cancelled-bg: #f1f5f9;
+    --status-cancelled-color: #475569;
+
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    --font-mono: 'Inter', system-ui, sans-serif;
+
+    --r: 14px;
+    --r-lg: 18px;
+    --r-sm: 10px;
+    --r-pill: 99px;
+
+    --shadow: 0 1px 2px rgba(28, 26, 51, 0.04), 0 2px 8px rgba(28, 26, 51, 0.04);
+    --shadow-lg: 0 8px 28px rgba(28, 26, 51, 0.08);
+    --shadow-lift: 0 16px 40px rgba(76, 29, 149, 0.14);
+
+    --chat-mine: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    --chat-mine-text: #ffffff;
+    --chat-theirs: #f2f0fa;
+    --chat-avatar: #a5a1c2;
+
+    --accent: var(--rose);
+    --accent2: var(--rose);
+    --ember: var(--danger);
+    --ember-light: #fff1f2;
+    --gold: var(--pink);
+    --gold2: var(--rose);
+    --gold-light: var(--blush);
+    --child: var(--rose);
+    --child-light: var(--blush);
+    --border3: #c4b5fd;
+    --surface-hover: var(--blush);
+}
+
+/* ── Tokens: dark ───────────────────────────────────────────────────────── */
+html[data-theme='dark'] {
+    --grad-brand: linear-gradient(135deg, #f472b6 0%, #a78bfa 50%, #60a5fa 100%);
+    --grad-primary: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+
+    --bg: #0e0c1b;
+    --surface: #161329;
+    --surface2: #1d1935;
+    --blush: #231d42;
+    --sage: #172241;
+    --rose: #a78bfa;
+    --rose-dark: #c4b5fd;
+    --pink: #f472b6;
+    --blue: #60a5fa;
+    --ink: #ecebf7;
+    --muted: #9d98bd;
+    --border: #2a2547;
+    --danger: #fb7185;
+
+    --rose-glow: rgba(167, 139, 250, 0.22);
+
+    --status-open-bg: rgba(244, 114, 182, 0.14);
+    --status-open-color: #f9a8d4;
+    --status-progress-bg: rgba(167, 139, 250, 0.16);
+    --status-progress-color: #c4b5fd;
+    --status-resolved-bg: rgba(52, 211, 153, 0.14);
+    --status-resolved-color: #6ee7b7;
+    --status-cancelled-bg: rgba(148, 163, 184, 0.14);
+    --status-cancelled-color: #cbd5e1;
+
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.4);
+    --shadow-lift: 0 16px 44px rgba(0, 0, 0, 0.5);
+
+    --chat-mine: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    --chat-mine-text: #ffffff;
+    --chat-theirs: #231d42;
+    --chat-avatar: #4b4570;
+
+    --ember-light: rgba(251, 113, 133, 0.14);
+    --border3: #6d5bd0;
+    --surface-hover: var(--blush);
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+html,
+body {
+    background: var(--bg) !important;
+}
+
+body {
+    color: var(--ink);
+    font-size: 14.5px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-style: normal !important;
+    letter-spacing: -0.02em;
+}
+
+::selection {
+    background: rgba(139, 92, 246, 0.22);
+}
+
+/* ── Navbar ─────────────────────────────────────────────────────────────── */
+.nav,
+.auth-nav {
+    background: color-mix(in srgb, var(--surface) 86%, transparent) !important;
+    backdrop-filter: saturate(160%) blur(16px);
+    border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    color: var(--ink) !important;
+}
+
+.nav-logo-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    background: var(--grad-brand);
+    animation: none;
+    box-shadow: 0 2px 8px var(--rose-glow);
+}
+
+.nav-link,
+.nav .btn-ghost {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-weight: 500;
+    border-color: transparent !important;
+    color: var(--muted) !important;
+}
+
+.nav .btn-ghost:hover,
+.nav-link:hover {
+    color: var(--ink) !important;
+    background: var(--blush) !important;
+}
+
+.theme-toggle {
+    background: var(--surface2) !important;
+    border: 1px solid var(--border) !important;
+    filter: grayscale(1);
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────────── */
+.sidebar {
+    background: var(--surface);
+    padding: 24px 12px;
+}
+
+.sidebar-section-label {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 12px !important;
+    font-weight: 600;
+    color: var(--muted);
+    padding-left: 12px;
+}
+
+.sidebar-link {
+    color: var(--muted);
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.sidebar-link>span:first-child {
+    filter: grayscale(1);
+    opacity: 0.55 !important;
+}
+
+.sidebar-link:hover {
+    background: var(--surface2);
+    color: var(--ink);
+}
+
+.sidebar-link.active {
+    background: var(--blush);
+    color: var(--rose);
+    font-weight: 600;
+}
+
+.sidebar-link.active::before {
+    background: var(--grad-brand);
+    width: 3px;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+.btn {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+.btn-primary {
+    background: var(--grad-primary);
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 4px 14px var(--rose-glow);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--grad-primary);
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px var(--rose-glow);
+}
+
+.btn-ghost {
+    color: var(--ink);
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.btn-ghost:hover:not(:disabled) {
+    background: var(--surface2);
+    border-color: var(--border3);
+    transform: none;
+}
+
+.btn-outline {
+    color: var(--ink);
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.btn-outline:hover:not(:disabled) {
+    background: var(--surface2);
+    border-color: var(--border3);
+    transform: none;
+}
+
+.btn-danger {
+    background: var(--danger);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12.5px;
+}
+
+/* ── Cards, stats ───────────────────────────────────────────────────────── */
+.card,
+.glass-panel,
+.table-wrapper,
+.auth-card,
+.modal {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--r) !important;
+    box-shadow: var(--shadow) !important;
+}
+
+.card:hover {
+    border-color: var(--border3) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.auth-card {
+    box-shadow: var(--shadow-lg) !important;
+    border-radius: var(--r-lg) !important;
+}
+
+.stat-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    height: 3px;
+    background: var(--grad-brand);
+    opacity: 0.85;
+}
+
+.stat-icon-chip {
+    border-radius: 12px !important;
+    background: var(--grad-brand) !important;
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 18px !important;
+    box-shadow: 0 4px 12px var(--rose-glow);
+    color: transparent;
+    text-shadow: 0 0 0 #ffffff;
+    /* emoji -> clean white glyph */
+}
+
+.stat-label {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: var(--muted) !important;
+}
+
+.stat-value {
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.03em !important;
+}
+
+/* ── Page headers ───────────────────────────────────────────────────────── */
+.page-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(24px, 2.6vw, 30px);
+    letter-spacing: -0.025em;
+}
+
+.page-subtitle {
+    color: var(--muted);
+}
+
+.section-label {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    background: var(--grad-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+
+.section-label::before {
+    display: none;
+}
+
+/* ── Forms ──────────────────────────────────────────────────────────────── */
+.label {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: var(--ink) !important;
+}
+
+.input,
+.input-field,
+.page select,
+.modal select {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--ink) !important;
+    border-radius: 10px !important;
+}
+
+.input:focus,
+.input-field:focus,
+.page select:focus,
+.modal select:focus {
+    border-color: var(--rose) !important;
+    box-shadow: 0 0 0 4px var(--rose-glow) !important;
+    outline: none;
+}
+
+/* ── Badges ─────────────────────────────────────────────────────────────── */
+.badge {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-weight: 600;
+    font-size: 12px;
+    border-radius: 8px;
+    padding: 3px 9px;
+}
+
+.badge-neutral,
+.badge-gray {
+    background: var(--surface2) !important;
+    color: var(--muted) !important;
+}
+
+.badge-blue {
+    background: var(--sage) !important;
+    color: var(--blue) !important;
+}
+
+.badge-purple {
+    background: var(--status-progress-bg) !important;
+    color: var(--status-progress-color) !important;
+}
+
+.badge-rose {
+    background: var(--status-open-bg) !important;
+    color: var(--status-open-color) !important;
+}
+
+.badge-emerald,
+.badge-green {
+    background: var(--status-resolved-bg) !important;
+    color: var(--status-resolved-color) !important;
+}
+
+.badge-amber,
+.badge-warm,
+.badge-gold {
+    background: var(--status-open-bg) !important;
+    color: var(--status-open-color) !important;
+}
+
+.badge-red,
+.badge-danger {
+    background: var(--ember-light) !important;
+    color: var(--danger) !important;
+}
+
+/* ── Tables ─────────────────────────────────────────────────────────────── */
+.crm-table th {
+    background: var(--surface2) !important;
+    color: var(--muted) !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+}
+
+.crm-table td {
+    color: var(--ink);
+}
+
+.crm-table tbody tr:hover {
+    background: var(--surface2) !important;
+}
+
+/* ── Auth + entry page ──────────────────────────────────────────────────── */
+.auth-page {
+    background:
+        radial-gradient(900px 500px at 15% -10%, rgba(236, 72, 153, 0.10), transparent 60%),
+        radial-gradient(900px 500px at 85% 0%, rgba(59, 130, 246, 0.10), transparent 60%),
+        radial-gradient(700px 500px at 50% 110%, rgba(139, 92, 246, 0.10), transparent 60%),
+        var(--bg) !important;
+}
+
+.auth-title {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+}
+
+.auth-page h1 {
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.03em;
+    background: var(--grad-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+
+[id^='role-btn-'] {
+    border-radius: var(--r-lg) !important;
+    padding: 28px !important;
+}
+
+[id^='role-btn-']>span:first-child {
+    background: var(--grad-brand) !important;
+    height: 3px !important;
+}
+
+[id^='role-btn-']>span:nth-child(2) {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--grad-brand);
+    font-size: 20px !important;
+    color: transparent;
+    text-shadow: 0 0 0 #ffffff;
+    box-shadow: 0 6px 16px var(--rose-glow);
+}
+
+[id^='role-btn-'] span[style*='uppercase'] {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 11.5px !important;
+    color: var(--rose) !important;
+    background: var(--blush) !important;
+    border-color: transparent !important;
+}
+
+[id^='role-btn-']>span:last-child {
+    color: var(--rose) !important;
+    font-weight: 600;
+}
+
+[id^='role-btn-']>div>span:first-child {
+    font-family: var(--font-display) !important;
+}
+
+/* ── Modals, misc ───────────────────────────────────────────────────────── */
+.modal-overlay {
+    background: rgba(14, 12, 27, 0.45) !important;
+    backdrop-filter: blur(4px);
+}
+
+.modal-title {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+}
+
+.spinner {
+    border-top-color: var(--rose) !important;
+}
+
+[style*='font-family: var(--font-mono)'] {
+    letter-spacing: 0 !important;
+}
+
+/* ── Customer portal layout ─────────────────────────────────────────────── */
+/* the navbar is fixed, so push the page content below it */
+.layout-root>nav.nav+main {
+    padding-top: 88px !important;
+}
+
+.layout-root>nav.nav>.row:nth-child(2) {
+    gap: 4px !important;
+    margin-left: 28px;
+}

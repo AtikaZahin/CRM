@@ -141,7 +141,7 @@ const CustomerTicketsPage = () => {
 
         {/* Title and Header Status */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24, flexWrap: 'wrap' }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4caf50', flexShrink: 0 }} />
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--status-resolved-color)', flexShrink: 0 }} />
           <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 26, fontWeight: 700, margin: 0, color: 'var(--ink)' }}>
             Ticket #{selectedTicket.id} — {selectedTicket.subject}
           </h1>
@@ -153,7 +153,7 @@ const CustomerTicketsPage = () => {
                 fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: '0.06em',
-                background: '#f6e7e2',
+                background: 'var(--blush)',
                 color: '#d98d7e',
                 textTransform: 'uppercase'
               }}
@@ -167,8 +167,8 @@ const CustomerTicketsPage = () => {
                 fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: '0.06em',
-                background: '#eee4dc',
-                color: '#4a423c',
+                background: 'var(--surface2)',
+                color: 'var(--muted)',
                 textTransform: 'uppercase'
               }}
             >
@@ -182,7 +182,7 @@ const CustomerTicketsPage = () => {
           {/* Left Chat Card */}
           <div
             style={{
-              background: '#ffffff',
+              background: 'var(--surface)',
               border: '1px solid var(--border)',
               borderRadius: 24,
               height: 640,
@@ -203,7 +203,7 @@ const CustomerTicketsPage = () => {
           {/* Right Sidebar Details */}
           <div
             style={{
-              background: '#ffffff',
+              background: 'var(--surface)',
               border: '1px solid var(--border)',
               borderRadius: 24,
               padding: 24,
@@ -219,7 +219,7 @@ const CustomerTicketsPage = () => {
                 SUPPORT AGENT
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#d98d7e', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 18 }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--rose)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 18 }}>
                   {selectedTicket.agent_first_name ? selectedTicket.agent_first_name.charAt(0).toUpperCase() : 'A'}
                 </div>
                 <div>
@@ -333,13 +333,12 @@ const CustomerTicketsPage = () => {
                   </td>
                   <td>
                     <span
-                      className={`badge ${
-                        t.status === 'OPEN'
-                          ? 'badge-amber'
-                          : t.status === 'IN_PROGRESS'
+                      className={`badge ${t.status === 'OPEN'
+                        ? 'badge-amber'
+                        : t.status === 'IN_PROGRESS'
                           ? 'badge-blue'
                           : 'badge-gray'
-                      }`}
+                        }`}
                     >
                       {t.status}
                     </span>

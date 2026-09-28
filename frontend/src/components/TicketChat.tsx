@@ -150,15 +150,15 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#ffffff', borderRadius: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--surface)', borderRadius: 16, overflow: 'hidden' }}>
       {/* Connection indicator */}
       {isOffline && (
-        <div style={{ background: '#5b4a3f', color: '#fff', fontSize: 11, padding: '6px 16px', textAlign: 'center', fontFamily: 'var(--font)', fontWeight: 600, letterSpacing: '0.06em' }}>
+        <div style={{ background: 'var(--surface2)', color: 'var(--muted)', fontSize: 12, padding: '6px 16px', textAlign: 'center', fontFamily: 'var(--font)', fontWeight: 600 }}>
           Offline – showing saved messages (read-only)
         </div>
       )}
       {!isOffline && !isConnected && (
-        <div style={{ background: '#d98d7e', color: '#fff', fontSize: 11, padding: '6px 16px', textAlign: 'center', fontFamily: 'var(--font)', fontWeight: 600, letterSpacing: '0.06em' }}>
+        <div style={{ background: 'var(--blush)', color: 'var(--rose)', fontSize: 12, padding: '6px 16px', textAlign: 'center', fontFamily: 'var(--font)', fontWeight: 600 }}>
           Connecting to live chat…
         </div>
       )}
@@ -192,14 +192,14 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
                     </div>
                     <div
                       style={{
-                        background: '#d98d7e',
-                        color: '#ffffff',
+                        background: 'var(--chat-mine)',
+                        color: 'var(--chat-mine-text)',
                         padding: '14px 20px',
                         borderRadius: 18,
                         fontSize: 14,
                         lineHeight: 1.5,
                         fontFamily: 'var(--font)',
-                        boxShadow: '0 2px 8px rgba(217, 141, 126, 0.15)',
+                        boxShadow: '0 4px 14px var(--rose-glow)',
                         wordBreak: 'break-word'
                       }}
                     >
@@ -211,7 +211,7 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
                       width: 38,
                       height: 38,
                       borderRadius: '50%',
-                      background: '#c57a6b',
+                      background: 'var(--grad-brand)',
                       color: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
@@ -236,7 +236,7 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
                     width: 38,
                     height: 38,
                     borderRadius: '50%',
-                    background: '#8a8078',
+                    background: 'var(--chat-avatar)',
                     color: '#ffffff',
                     display: 'flex',
                     alignItems: 'center',
@@ -256,7 +256,7 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
                   </div>
                   <div
                     style={{
-                      background: '#f6e7e2',
+                      background: 'var(--chat-theirs)',
                       color: 'var(--ink)',
                       padding: '14px 20px',
                       borderRadius: 18,
@@ -278,14 +278,14 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
 
       {/* Pill Reply Input Bar */}
       {!isReadOnly && !isOffline && (
-        <div style={{ padding: '16px 24px', background: '#ffffff', borderTop: '1px solid var(--border)', borderRadius: '0 0 24px 24px' }}>
+        <div style={{ padding: '16px 24px', background: 'var(--surface)', borderTop: '1px solid var(--border)', borderRadius: '0 0 24px 24px' }}>
           <form onSubmit={handleSend} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <input
               style={{
                 flex: 1,
                 height: 48,
                 borderRadius: 99,
-                background: '#f6e7e2',
+                background: 'var(--surface2)',
                 border: 'none',
                 padding: '0 24px',
                 fontSize: 14,
@@ -306,13 +306,12 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
                 height: 48,
                 padding: '0 28px',
                 borderRadius: 99,
-                background: '#d98d7e',
+                background: 'var(--grad-primary)',
                 color: '#ffffff',
                 border: 'none',
                 fontFamily: 'var(--font)',
                 fontWeight: 600,
                 fontSize: 13,
-                letterSpacing: '0.06em',
                 cursor: isConnected && newMessage.trim() ? 'pointer' : 'not-allowed',
                 opacity: isConnected && newMessage.trim() ? 1 : 0.6,
                 transition: 'all 0.2s ease',

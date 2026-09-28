@@ -40,10 +40,10 @@ const SupportPage = () => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<TabType>(currentUser?.role === 'EMPLOYEE' ? 'IN_PROGRESS' : 'UNASSIGNED');
-  
+
   const [tickets, setTickets] = useState<TicketResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [team, setTeam] = useState<UserItem[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<TicketResponse | null>(null);
 
@@ -57,7 +57,7 @@ const SupportPage = () => {
       if (st === 'OPEN') setActiveTab('UNASSIGNED');
       else if (st === 'IN_PROGRESS') setActiveTab('IN_PROGRESS');
       else if (st === 'RESOLVED') setActiveTab('RESOLVED');
-      
+
       navigate('/staff/support', { replace: true, state: {} });
     }
   }, [location.state, navigate]);
@@ -182,7 +182,7 @@ const SupportPage = () => {
 
         {/* Header Title & Real Status Badges */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24, flexWrap: 'wrap' }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: selectedTicket.status === 'RESOLVED' ? '#8a8078' : '#4caf50', flexShrink: 0 }} />
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: selectedTicket.status === 'RESOLVED' ? '#8a8078' : 'var(--status-resolved-color)', flexShrink: 0 }} />
           <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 26, fontWeight: 700, margin: 0, color: 'var(--ink)' }}>
             Ticket #{selectedTicket.id} — {selectedTicket.subject}
           </h1>
@@ -237,7 +237,7 @@ const SupportPage = () => {
           {/* Main Chat Area */}
           <div
             style={{
-              background: '#ffffff',
+              background: 'var(--surface)',
               border: '1px solid var(--border)',
               borderRadius: 24,
               height: 640,
@@ -258,7 +258,7 @@ const SupportPage = () => {
           {/* Real Ticket Details Sidebar */}
           <div
             style={{
-              background: '#ffffff',
+              background: 'var(--surface)',
               border: '1px solid var(--border)',
               borderRadius: 24,
               padding: 24,
@@ -274,7 +274,7 @@ const SupportPage = () => {
                 CUSTOMER
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#d98d7e', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 18 }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--rose)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 18 }}>
                   C
                 </div>
                 <div>
@@ -333,8 +333,8 @@ const SupportPage = () => {
                         width: '100%',
                         padding: '12px 16px',
                         borderRadius: 99,
-                        background: '#e8ece3',
-                        color: '#3b5a38',
+                        background: 'var(--status-resolved-bg)',
+                        color: 'var(--status-resolved-color)',
                         border: 'none',
                         fontFamily: 'var(--font)',
                         fontSize: 12,
@@ -475,8 +475,8 @@ const SupportPage = () => {
                     </td>
                     {(isAdmin || isLead) && (activeTab === 'UNASSIGNED' || activeTab === 'IN_PROGRESS') && (
                       <td>
-                        <select 
-                          className="input" 
+                        <select
+                          className="input"
                           style={{ minWidth: 160 }}
                           onChange={(e) => {
                             if (e.target.value) {
