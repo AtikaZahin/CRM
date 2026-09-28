@@ -64,6 +64,21 @@ html[data-theme='light'] {
     --child-light: var(--blush);
     --border3: #c4b5fd;
     --surface-hover: var(--blush);
+    /* extra names still used by global.css */
+    --emerald: var(--status-resolved-color);
+    --emerald-light: var(--status-resolved-bg);
+    --bg2: var(--surface2);
+    --bg3: var(--blush);
+    --surface3: var(--blush);
+    --ink2: var(--ink);
+    --fg: var(--ink);
+    --subtle: var(--muted);
+    --border2: var(--border);
+    --blue-light: var(--sage);
+    --gold-border: var(--border3);
+    --child-border: var(--border3);
+    --r-sm-var: var(--r-sm);
+    --transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ── Tokens: dark ───────────────────────────────────────────────────────── */
