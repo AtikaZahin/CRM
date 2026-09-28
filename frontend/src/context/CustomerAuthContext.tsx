@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 
 import { api } from '../services/api';
+import { clearCacheForToken } from '../offline/cache';
 
 interface CustomerProfile {
   id: number;
@@ -60,6 +61,7 @@ export const CustomerAuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    clearCacheForToken(localStorage.getItem('customer_token')); // delete this account's offline data
     localStorage.removeItem('customer_token');
     setToken(null);
     setUser(null);

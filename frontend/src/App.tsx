@@ -21,10 +21,11 @@ import CustomerOrdersPage from './pages/CustomerOrdersPage';
 import CustomerTicketsPage from './pages/CustomerTicketsPage';
 import AccountPage from './pages/AccountPage';
 import SparklesOverlay from './components/SparklesOverlay';
-
+import OfflineBanner from './components/OfflineBanner';
 function App() {
   return (
     <ThemeProvider>
+      <OfflineBanner />
       <SparklesOverlay />
       <Router>
         <Toaster
@@ -40,13 +41,13 @@ function App() {
               boxShadow: '0 4px 16px rgba(236,72,153,0.14)',
             },
             success: { iconTheme: { primary: '#ec4899', secondary: '#fdf2f8' } },
-            error:   { iconTheme: { primary: '#e11d48', secondary: '#fdf2f8' } },
+            error: { iconTheme: { primary: '#e11d48', secondary: '#fdf2f8' } },
           }}
         />
         <Routes>
           {/* Entry page */}
           <Route path="/" element={<RoleSelectorPage />} />
-          
+
           {/* Default fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
 
@@ -77,7 +78,7 @@ function App() {
             <Route index element={<ShopPage />} />
             <Route path="login" element={<LoginPage type="customer" />} />
             <Route path="register" element={<RegisterPage />} />
-            
+
             {/* Protected customer routes */}
             <Route element={<ProtectedCustomerRoute><Outlet /></ProtectedCustomerRoute>}>
               <Route path="orders" element={<CustomerOrdersPage />} />
@@ -85,7 +86,7 @@ function App() {
               <Route path="account" element={<AccountPage />} />
               <Route path="dashboard" element={<Navigate to="/shop/orders" replace />} />
             </Route>
-            
+
             <Route path="*" element={<Navigate to="/shop" replace />} />
           </Route>
 

@@ -13,7 +13,9 @@ if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
     SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL
+    SQLALCHEMY_DATABASE_URL,
+    pool_pre_ping=True,                   # drop dead connections after the network comes back
+    connect_args={"connect_timeout": 5},  # fail fast (-> 503) instead of hanging when offline
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

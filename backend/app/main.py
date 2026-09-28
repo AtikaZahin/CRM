@@ -29,9 +29,26 @@ from app.models.ticket import Ticket, Message
 from app.models.announcement import Announcement
 
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, InterfaceError
+from fastapi import Request
+from fastapi.responses import JSONResponse
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Create database tables.
+# If the database can't be reached at startup (e.g. no internet), start anyway:
+# requests will get a 503 and the frontend switches to its offline cache.
+try:
+    Base.metadata.create_all(bind=engine)
+except OperationalError as e:
+    print("WARNING: database unreachable at startup – tables not checked:", e.__class__.__name__)
+
+
+# Phase 10.3: database unreachable -> 503 (not a 500 with a stack trace).
+# The frontend treats 503 as "offline" and shows cached data.
+@app.exception_handler(OperationalError)
+@app.exception_handler(InterfaceError)
+async def database_unavailable_handler(request: Request, exc: Exception):
+    return JSONResponse(status_code=503, content={"detail": "Database unavailable"})
+
 
 @app.get("/")
 def read_root():
@@ -39,6 +56,16 @@ def read_root():
 
 @app.get("/health")
 def health_check():
+    return {"status": "ok"}
+
+@app.get("/health/db")
+def health_db_check():
+    """200 only when the database answers. Used by the frontend to detect 'back online'."""
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+    except Exception:
+        return JSONResponse(status_code=503, content={"status": "database unavailable"})
     return {"status": "ok"}
 
 

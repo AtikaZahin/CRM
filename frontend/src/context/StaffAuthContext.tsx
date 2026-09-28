@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 
 import { api } from '../services/api';
-
+import { clearCacheForToken } from '../offline/cache';
 interface StaffProfile {
   id: number;
   name?: string;
@@ -63,6 +63,7 @@ export const StaffAuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    clearCacheForToken(localStorage.getItem('staff_token')); // delete this account's offline data
     localStorage.removeItem('staff_token');
     setToken(null);
     setUser(null);

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-import { API_URL, WS_URL } from '../config';
+import { WS_URL } from '../config';
+import { api } from '../services/api';
+import { useOffline } from '../offline/useOffline';
 
 interface TicketChatProps {
   ticketId: number;
@@ -24,21 +25,23 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isConnected, setIsConnected] = useState(false);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeout = useRef<number | null>(null);
+  const { isOffline } = useOffline();
 
+  // Relative path so the api.ts offline cache can save / serve this history.
   const historyUrl =
     portalType === 'customer'
-      ? `${API_URL}/customer/tickets/${ticketId}/messages`
-      : `${API_URL}/tickets/${ticketId}/messages`;
+      ? `/customer/tickets/${ticketId}/messages`
+      : `/tickets/${ticketId}/messages`;
 
   useEffect(() => {
     let isSubscribed = true;
     const fetchHistory = async () => {
       try {
-        const res = await axios.get(historyUrl, {
+        const res = await api.get(historyUrl, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (isSubscribed) {
@@ -50,12 +53,18 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
     };
     fetchHistory();
     return () => { isSubscribed = false; };
-  }, [ticketId, token, historyUrl]);
+  }, [ticketId, token, historyUrl, isOffline]); // re-load history when we come back online
 
   useEffect(() => {
     let isSubscribed = true;
     let ws: WebSocket | null = null;
-    
+
+    // Offline: no live chat – just show the saved history (read-only).
+    if (isOffline) {
+      setIsConnected(false);
+      return () => { isSubscribed = false; };
+    }
+
     const connectWs = () => {
       ws = new WebSocket(`${WS_URL}/ws/tickets/${ticketId}?token=${token}`);
 
@@ -105,7 +114,7 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
       }
       wsRef.current = null;
     };
-  }, [ticketId, token]);
+  }, [ticketId, token, isOffline]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -117,7 +126,7 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
     e.preventDefault();
     const trimmed = newMessage.trim();
     if (!trimmed || isReadOnly) return;
-    
+
     if (wsRef.current && isConnected) {
       wsRef.current.send(trimmed);
       setNewMessage('');
@@ -143,7 +152,12 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#ffffff', borderRadius: 24 }}>
       {/* Connection indicator */}
-      {!isConnected && (
+      {isOffline && (
+        <div style={{ background: '#5b4a3f', color: '#fff', fontSize: 11, padding: '6px 16px', textAlign: 'center', fontFamily: 'var(--font)', fontWeight: 600, letterSpacing: '0.06em' }}>
+          Offline – showing saved messages (read-only)
+        </div>
+      )}
+      {!isOffline && !isConnected && (
         <div style={{ background: '#d98d7e', color: '#fff', fontSize: 11, padding: '6px 16px', textAlign: 'center', fontFamily: 'var(--font)', fontWeight: 600, letterSpacing: '0.06em' }}>
           Connecting to live chat…
         </div>
@@ -263,7 +277,7 @@ const TicketChat = ({ ticketId, token, isReadOnly, portalType }: TicketChatProps
       </div>
 
       {/* Pill Reply Input Bar */}
-      {!isReadOnly && (
+      {!isReadOnly && !isOffline && (
         <div style={{ padding: '16px 24px', background: '#ffffff', borderTop: '1px solid var(--border)', borderRadius: '0 0 24px 24px' }}>
           <form onSubmit={handleSend} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <input
