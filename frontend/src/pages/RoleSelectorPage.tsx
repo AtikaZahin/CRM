@@ -9,7 +9,7 @@ const roles = [
     icon: '⚙️',
     description: 'System-wide control and configurations.',
     badge: 'Staff Portal',
-    accentHex: '#d98d7e',
+    accentHex: '#ec4899',
     path: '/staff/login',
   },
   {
@@ -18,7 +18,7 @@ const roles = [
     icon: '👤',
     description: 'Access your CRM dashboard and tickets.',
     badge: 'Staff Portal',
-    accentHex: '#5a7350',
+    accentHex: '#f472b6',
     path: '/staff/login',
   },
   {
@@ -27,7 +27,7 @@ const roles = [
     icon: '🛍️',
     description: 'View orders and manage support tickets.',
     badge: 'Customer Portal',
-    accentHex: '#9a6f2a',
+    accentHex: '#db2777',
     path: '/shop/login',
   },
 ];

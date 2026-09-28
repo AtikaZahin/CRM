@@ -20,25 +20,27 @@ import ShopPage from './pages/ShopPage';
 import CustomerOrdersPage from './pages/CustomerOrdersPage';
 import CustomerTicketsPage from './pages/CustomerTicketsPage';
 import AccountPage from './pages/AccountPage';
+import SparklesOverlay from './components/SparklesOverlay';
 
 function App() {
   return (
     <ThemeProvider>
+      <SparklesOverlay />
       <Router>
         <Toaster
           position="top-right"
           toastOptions={{
             style: {
-              background: '#fdf9f2',
-              color: '#1a1714',
-              border: '1px solid rgba(43,32,19,0.14)',
+              background: '#fdf2f8',
+              color: '#4c0519',
+              border: '1px solid #fbcfe8',
               fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: '13px',
               borderRadius: '8px',
-              boxShadow: '0 4px 16px rgba(43,32,19,0.12)',
+              boxShadow: '0 4px 16px rgba(236,72,153,0.14)',
             },
-            success: { iconTheme: { primary: '#4a5a35', secondary: '#fdf9f2' } },
-            error:   { iconTheme: { primary: '#7a3b3b', secondary: '#fdf9f2' } },
+            success: { iconTheme: { primary: '#ec4899', secondary: '#fdf2f8' } },
+            error:   { iconTheme: { primary: '#e11d48', secondary: '#fdf2f8' } },
           }}
         />
         <Routes>

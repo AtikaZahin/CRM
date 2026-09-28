@@ -1,33 +1,33 @@
-/* ─── Capstone CRM · Warm Blush Design System ─────────────────────────────── */
+/* ─── Capstone CRM · Pink Sparkles Design System ──────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Inter:wght@400;500;600&display=swap');
 
-/* ─── CSS Custom Properties ────────────────────────────────────────────────── */
-:root {
-  /* Core palette */
-  --bg:        #fbf7f2;
-  --surface:   #ffffff;
-  --blush:     #f6e7e2;
-  --rose:      #d98d7e;
-  --rose-dark: #c57a6b;
-  --sage:      #e8ece3;
-  --ink:       #4a423c;
-  --muted:     #8a8078;
-  --border:    #eee4dc;
-  --danger:    #d97070;
+/* ─── CSS Custom Properties (Pink Theme) ──────────────────────────────────── */
+:root, html[data-theme='light'] {
+  /* Core Pink Palette */
+  --bg:        #fdf2f8; /* Soft Cotton Candy Pink */
+  --surface:   #ffffff; /* Pure White Card */
+  --blush:     #fbcfe8; /* Soft Rose Pink */
+  --rose:      #ec4899; /* Vibrant Hot Pink / Primary */
+  --rose-dark: #db2777; /* Deep Magenta Pink */
+  --sage:      #fce7f3; /* Light Pink Container */
+  --ink:       #4c0519; /* Rich Dark Plum/Berry Text */
+  --muted:     #be185d; /* Muted Deep Pink */
+  --border:    #fbcfe8; /* Pretty Pink Border */
+  --danger:    #e11d48; /* Vivid Crimson Rose */
 
   /* Derived */
-  --surface2:  #fdf5f0;
-  --rose-glow: rgba(217,141,126,0.18);
+  --surface2:  #fce7f3;
+  --rose-glow: rgba(236,72,153,0.25);
 
-  /* Status pill colours */
-  --status-open-bg:        #f6e7e2;
-  --status-open-color:     #b85c4e;
-  --status-progress-bg:    #f5e6c8;
-  --status-progress-color: #9a6f2a;
-  --status-resolved-bg:    #e8ece3;
-  --status-resolved-color: #5a7350;
-  --status-cancelled-bg:   #ebebeb;
-  --status-cancelled-color:#7a7878;
+  /* Status pill colours (Pink Shades) */
+  --status-open-bg:        #fce7f3;
+  --status-open-color:     #db2777;
+  --status-progress-bg:    #fff1f2;
+  --status-progress-color: #e11d48;
+  --status-resolved-bg:    #fbcfe8;
+  --status-resolved-color: #be185d;
+  --status-cancelled-bg:   #f3e8ff;
+  --status-cancelled-color:#9333ea;
 
   /* Typography */
   --font:         'Inter', system-ui, sans-serif;
@@ -41,9 +41,9 @@
   --r-pill:99px;
 
   /* Shadows */
-  --shadow:     0 1px 3px rgba(74,66,60,0.06), 0 4px 16px rgba(74,66,60,0.05);
-  --shadow-lg:  0 8px 32px rgba(74,66,60,0.12);
-  --shadow-lift:0 12px 40px rgba(74,66,60,0.16);
+  --shadow:     0 2px 8px rgba(236,72,153,0.08), 0 4px 16px rgba(236,72,153,0.06);
+  --shadow-lg:  0 12px 32px rgba(236,72,153,0.16);
+  --shadow-lift:0 16px 44px rgba(236,72,153,0.22);
 
   /* Transition */
   --transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
@@ -52,27 +52,60 @@
   --accent:      var(--rose);
   --accent2:     var(--rose);
   --ember:       var(--danger);
-  --ember-light: #fde8e8;
+  --ember-light: #ffe4e6;
   --emerald:     var(--status-resolved-color);
   --emerald-light: var(--status-resolved-bg);
-  --gold:        var(--status-progress-color);
-  --gold2:       var(--status-progress-color);
-  --gold-light:  var(--status-progress-bg);
-  --gold-border: rgba(154,111,42,0.30);
+  --gold:        #f43f5e;
+  --gold2:       #ec4899;
+  --gold-light:  #fce7f3;
+  --gold-border: rgba(236,72,153,0.30);
   --bg2:         var(--surface2);
   --bg3:         var(--blush);
   --surface3:    var(--blush);
   --ink2:        var(--ink);
-  --subtle:      rgba(138,128,120,0.45);
+  --subtle:      rgba(190,24,93,0.35);
   --border2:     var(--border);
-  --border3:     #d6c8bf;
+  --border3:     #f472b6;
   --blue-light:  var(--blush);
-  --child:       var(--status-progress-color);
-  --child-light: var(--status-progress-bg);
-  --child-border:rgba(154,111,42,0.30);
-  --surface-hover: var(--blush);
+  --child:       #ec4899;
+  --child-light: #fce7f3;
+  --child-border:rgba(236,72,153,0.30);
+  --surface-hover: #fce7f3;
   --fg:          var(--ink);
   --r-sm-var:    var(--r-sm);
+}
+
+html[data-theme='dark'] {
+  --bg:        #18040d; /* Midnight Deep Magenta Pink */
+  --surface:   #270919; /* Dark Pink Plum Card Surface */
+  --blush:     #4c0519; /* Deep Rose Accent Surface */
+  --rose:      #f472b6; /* Radiant Hot Pink */
+  --rose-dark: #ec4899; /* Bright Magenta Pink */
+  --sage:      #380b22; /* Dark Pink Container */
+  --ink:       #fce7f3; /* Cotton Candy Soft White Text */
+  --muted:     #f472b6; /* Muted Radiant Pink */
+  --border:    #701a40; /* Dark Magenta Border */
+  --danger:    #fb7185; /* Soft Rose Red */
+
+  --surface2:  #340b20;
+  --rose-glow: rgba(244,114,182,0.30);
+
+  --status-open-bg:        #4c0519;
+  --status-open-color:     #f472b6;
+  --status-progress-bg:    #500724;
+  --status-progress-color: #fb7185;
+  --status-resolved-bg:    #380b22;
+  --status-resolved-color: #f472b6;
+  --status-cancelled-bg:   #2e1065;
+  --status-cancelled-color:#c084fc;
+
+  --shadow:     0 2px 12px rgba(244,114,182,0.12), 0 4px 20px rgba(0,0,0,0.5);
+  --shadow-lg:  0 12px 36px rgba(244,114,182,0.22);
+  --shadow-lift:0 16px 48px rgba(244,114,182,0.30);
+
+  --border3:     #f472b6;
+  --ember-light: #4c0519;
+  --surface-hover: #3e0a27;
 }
 
 /* ─── Reset ────────────────────────────────────────────────────────────────── */
