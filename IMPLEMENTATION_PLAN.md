@@ -763,7 +763,7 @@ Done when (on the live URLs, two browsers):
 
 - Render's free tier **sleeps after ~15 minutes idle**, and the first request then takes about a minute. Open the backend `/health` URL 5 minutes before presenting.
 - Supabase's free tier **pauses a project after about a week of no activity**. Log in to the Supabase dashboard a day before the demo to check it is active.
-- Keep a local fallback ready (Phase 10, Task 10.5) in case the venue's internet fails.
+- If the venue has no internet, only pages each user opened earlier while online are visible (read-only), via Phase 10.
 
 ---
 
@@ -795,7 +795,7 @@ Security rules:
 - A cache older than 7 days is deleted and not shown.
 - Only responses the server returned to this user are cached – the cache never bypasses permissions.
 
-### [ ] Task 10.1 – Service worker (app loads offline)
+### [x] Task 10.1 – Service worker (app loads offline)
 
 - Add `vite-plugin-pwa` (a version compatible with this project's Vite version) with `registerType: 'autoUpdate'`.
 - Precache the built app files (JS, CSS, HTML, icons) only.
@@ -806,7 +806,7 @@ Done when:
 
 - On the deployed site: visit once online, turn the network off in DevTools (Network → Offline), reload – the app shell loads.
 
-### [ ] Task 10.2 – Local cache layer
+### [x] Task 10.2 – Local cache layer
 
 - Add `dexie`. Create `frontend/src/offline/db.ts` with tables: `tickets`, `messages`, `orders`, `customers`, `announcements`, `meta` (for `owner_key`, `last_synced_at`, dashboard JSON).
 - Create `frontend/src/offline/cache.ts` with:
@@ -820,14 +820,30 @@ Done when:
 
 - A unit-style check in the browser console: save 60 orders, prune, 50 remain.
 
-### [ ] Task 10.3 – Online/offline detection
+### [x] Task 10.3 – Online/offline detection
 
-- Create `useOnlineStatus()`, based on `navigator.onLine` plus `online`/`offline` events. Also treat a network error from `api` (no response at all) as offline.
-  - Must not treat a 401/403/404/500 as offline – only "no response".
+Offline must be detected in **two** situations:
+
+1. The browser has no network at all (`navigator.onLine` is false, or a request gets no response).
+2. The browser can reach the backend, but the backend cannot reach Supabase. This is what happens when the backend runs on `localhost` and the Wi-Fi is off.
+
+Backend:
+
+- Add an exception handler in `main.py` for SQLAlchemy `OperationalError` (database unreachable) that returns **503** with `{"detail": "Database unavailable"}` instead of a 500 with a stack trace.
+
+Frontend:
+
+- Create `useOnlineStatus()`, based on `navigator.onLine` plus `online`/`offline` events.
+- Treat a request as "offline" when it gets **no response**, or a **503**. Do NOT treat 401/403/404/400/500 as offline.
+- While offline, retry `GET /health` every 15 seconds; when it and one real request succeed, switch back to online.
 - A banner in both layouts: "You're offline – showing data from <time>".
 - Export `isOffline` from a small context so pages can disable buttons.
 
-### [ ] Task 10.4 – Pages read and write the cache
+Done when:
+
+- With the backend running on localhost and Wi-Fi off, the banner appears (via the 503 path), not a blank page.
+
+### [x] Task 10.4 – Pages read and write the cache
 
 For each page (Announcements, Dashboard, Support + TicketChat, Customers, customer Orders, customer Tickets):
 
@@ -845,17 +861,187 @@ Done when (dry run on the deployed site):
 4. Go back online: the banner disappears and new messages load.
 5. Log out, log in as Meena while offline → she sees nothing of Ravi's.
 
-### [ ] Task 10.5 – Local fallback backend (for a venue with no internet)
+### ~~Task 10.5 – Local fallback backend~~ (dropped – no SQLite)
 
-This is a backup for the demo only, not used in production.
+Decision: SQLite is not used anywhere. Offline support is only the read-only browser cache (10.1–10.4).
 
-- `backend/app/database/connection.py`: if `DATABASE_URL` starts with `sqlite`, pass `connect_args={"check_same_thread": False}`.
-- Document in the README: set `DATABASE_URL=sqlite:///./local_demo.db`, run reset + seed, run the backend and `npm run dev` locally.
-- Check that every model works on SQLite (the atomic assign in Task 4.1 must still work).
+---
+
+## Phase 11 – Mobile app (Expo, React Native)
+
+Branch: `mobile-app` (created from `redesign`). App folder: `mobile/` at the project root. The old `android/build.gradle` is deleted.
+
+### Locked design
+
+- **Same backend, no backend changes.** The app calls the same FastAPI endpoints as the website. Every permission is already enforced by the backend; the app only hides buttons, exactly like the website.
+- **Expo Router** (file-based screens), **TypeScript**, **axios**, **expo-secure-store** for tokens (never AsyncStorage for tokens – it is not encrypted).
+- **Two separate sessions**, like the website: `staff_token` and `customer_token` in SecureStore, each with its own auth context. A staff token is never sent to customer endpoints and vice versa.
+- **Look:** the Orchid theme – same colour tokens as `theme-orchid.css` (light + dark follow the phone setting).
+- **Runs in Expo Go** on a real phone on the same Wi-Fi as the laptop.
+
+### Screens
+
+| Group | Screens |
+|---|---|
+| Start | Welcome: "I'm staff" / "I'm a customer" |
+| Staff (tabs) | Dashboard · Support (list → ticket chat) · Customers (list → detail) · Announcements · Profile |
+| Customer (tabs) | Shop · My Orders · My Tickets (list → chat) · Account |
+
+What changes by role (from `GET /staff/me` → `role`):
+
+| | ADMIN | LEAD | EMPLOYEE |
+|---|---|---|---|
+| Support tabs | Unassigned · In progress · Resolved | Unassigned · In progress · Resolved | In progress · Resolved |
+| In a ticket | Read-only chat | Chat, Assign (own team), Resolve | Chat, Resolve |
+| Announcements | Create / edit / delete | Read | Read |
+| Order status (Customers) | Change | Change (team tickets) | Change (own tickets) |
+
+### Endpoints the app uses (already exist)
+
+| Area | Endpoint |
+|---|---|
+| Staff auth | `POST /staff/login` `{email,password}` → `{access_token}` · `GET /staff/me` · `PATCH /staff/me` `{name,phone,profile}` |
+| Customer auth | `POST /customer/register` `{name,email,password,phone}` · `POST /customer/login` · `GET /customer/me` · `PATCH /customer/me` · `POST /customer/me/password` |
+| Dashboard | `GET /dashboard` |
+| Tickets (staff) | `GET /tickets?status=&unassigned=` · `POST /tickets/{id}/assign` `{employee_id}` · `POST /tickets/{id}/resolve` · `GET /tickets/{id}/messages` · `GET /staff` (team list for Assign) |
+| Tickets (customer) | `POST /customer/tickets` `{order_id,category,subject?,message}` · `GET /customer/tickets` · `GET /customer/tickets/{id}/messages` · `POST /customer/tickets/{id}/rate` `{rating}` |
+| Live chat | `ws://<host>:8000/ws/tickets/{id}?token=<jwt>` – send plain text, receive JSON messages |
+| Customers (staff) | `GET /customers` · `GET /customers/{id}` · `PATCH /orders/{id}/status` `{status}` |
+| Shop | `GET /products` · `POST /orders` `{product_id,quantity}` · `GET /orders/me` · `POST /orders/{id}/cancel` |
+| Announcements | `GET /announcements` · `POST /announcements` · `PUT /announcements/{id}` · `DELETE /announcements/{id}` |
+
+### Rules for the AI agent (add to the usual rules)
+
+```
+- Work ONLY inside mobile/. Do not change backend/ or frontend/.
+- Use Expo Router, TypeScript, axios, expo-secure-store. Install packages with
+  "npx expo install <pkg>" (not npm install) so versions match the Expo SDK.
+- Never hardcode the server address. Read it from process.env.EXPO_PUBLIC_API_URL.
+- Store tokens only in expo-secure-store. Never log tokens.
+- Every screen must handle: loading, empty list, and error (show a message, never a blank screen).
+- Must run in Expo Go – do not add libraries that need native code outside the Expo SDK.
+```
+
+### Test accounts (from seed)
+
+Staff: `admin@crm.test`, `anita@crm.test` (LEAD), `ravi@crm.test` (EMPLOYEE, Anita's team), `arjun@crm.test` (EMPLOYEE, Vikram's team). Customers: `priya@shop.test`, `rahul@shop.test`. Password for all: `Password@123`.
+
+---
+
+### [x] Task 11.0 – Setup
+
+1. `git checkout redesign && git pull && git checkout -b mobile-app`
+2. `git rm android/build.gradle`
+3. `npx create-expo-app@latest mobile`, then `cd mobile && npm run reset-project` (answer **n**).
+4. Start the backend so the phone can reach it: from `backend/`, `uvicorn app.main:app --host 0.0.0.0 --port 8000`.
+5. Find the laptop IP (`ipconfig` → IPv4, e.g. `192.168.1.5`). Allow Python through Windows Firewall when asked.
+6. On the phone's browser open `http://192.168.1.5:8000/health` → must show `{"status":"ok"}`. If not, fix Wi-Fi/firewall before going further.
+7. `npx expo start`, scan the QR in Expo Go → blank screen opens.
+
+Done when: steps 6 and 7 both work.
+
+### [x] Task 11.1 – API client, config and theme
+
+- `mobile/.env` with `EXPO_PUBLIC_API_URL=http://192.168.1.5:8000` (and `.env.example` with a placeholder; add `.env` to `mobile/.gitignore`).
+- `mobile/src/config.ts`: `API_URL` from the env var; `WS_URL` = same with `http→ws`, `https→wss`.
+- `mobile/src/api/client.ts`: one axios instance, 10 s timeout. A helper `authHeader(token)`. A function `errorMessage(err)` that returns the backend's `detail` (string or first validation message), or "Can't reach the server – check Wi-Fi" when there is no response.
+- `mobile/src/theme.ts`: Orchid colours for light and dark (copy the values from `frontend/src/styles/theme-orchid.css`), plus a `useTheme()` hook using `useColorScheme()`.
+- Reusable components: `Screen` (safe area + background), `Card`, `Button` (primary gradient / outline / danger, with `loading` and `disabled`), `TextField`, `Badge`, `EmptyState`, `ErrorState`.
+
+Done when: a temporary screen calls `GET /products` and shows the product count; turning the laptop's backend off shows the "Can't reach the server" message.
+
+### [x] Task 11.2 – Auth: welcome, staff login, customer login/register
+
+- `mobile/src/auth/StaffAuth.tsx` and `CustomerAuth.tsx`: contexts that load the token from SecureStore at start, call `/staff/me` or `/customer/me`, expose `user`, `login(token)`, `logout()`. Only a **401** logs the user out; a network error keeps the saved session.
+- Screens: `app/index.tsx` (welcome, two big buttons), `app/staff/login.tsx`, `app/customer/login.tsx`, `app/customer/register.tsx`.
+- Routing guard: opening a staff screen without a staff session redirects to staff login; same for customer.
+- Staff profile tab shows name, email, role badge and **Log out**.
 
 Done when:
+- Anita logs in and sees role `LEAD`; closing and reopening Expo Go keeps her logged in.
+- A wrong password shows the backend's error text.
+- Priya can register a new account and log in.
+- Logging in as staff does not log in the customer side (two separate sessions).
 
-- With Wi-Fi turned off, the full Priya → Anita → Ravi flow works on `localhost`.
+### [x] Task 11.3 – Staff tabs + Dashboard
+
+- `app/staff/(tabs)/_layout.tsx` with tabs: Dashboard, Support, Customers, Announcements, Profile.
+- Dashboard: `GET /dashboard`, show only the numbers that are present for this role (e.g. admin: staff, customers, orders; lead: team size, unassigned; everyone: tickets by status, average rating). Pull-to-refresh.
+
+Done when: Admin, Anita and Ravi each see different cards, matching the website's dashboard.
+
+### [x] Task 11.4 – Support list (staff)
+
+- Segment control: **Unassigned** (LEAD/ADMIN only), **In progress**, **Resolved** → `GET /tickets?unassigned=true` / `?status=IN_PROGRESS` / `?status=RESOLVED`.
+- Row: `#id`, subject, category badge, status badge, date. Tap → ticket screen. Pull-to-refresh.
+
+Done when: Ravi sees no Unassigned tab and only his tickets; Anita sees Unassigned plus her team's tickets.
+
+### [x] Task 11.5 – Live ticket chat (shared by staff and customer)
+
+- `mobile/src/components/TicketChat.tsx` with props `ticketId`, `token`, `portal: 'staff' | 'customer'`, `readOnly`.
+- Load history (`/tickets/{id}/messages` or `/customer/tickets/{id}/messages`), then open the WebSocket `WS_URL/ws/tickets/{id}?token=…`. Send = plain text; incoming = JSON message; ignore duplicates by `id`.
+- Reconnect after 3 s if the socket closes, **except** close code 4403 (no access) → show "You don't have access to this ticket".
+- Close the socket when the screen is left and when the app goes to the background (`AppState`); reconnect when it comes back.
+- Bubbles: mine on the right (violet gradient), theirs on the left, sender name + time. Input hidden when `readOnly` or the ticket is RESOLVED. Keyboard must not cover the input (`KeyboardAvoidingView`).
+
+Done when: website as Priya + phone as Ravi on the same ticket → messages appear on both within a second, in both directions.
+
+### [x] Task 11.6 – Ticket actions (staff)
+
+- Ticket screen header: status, category, order, customer name.
+- **Assign** (LEAD, ticket unassigned): bottom sheet with the lead's own EMPLOYEEs from `GET /staff` → `POST /tickets/{id}/assign`.
+- **Mark resolved** (assigned employee or their lead): confirm dialog → `POST /tickets/{id}/resolve`.
+- ADMIN: chat is read-only, no action buttons.
+- Show the backend error text if an action is refused.
+
+Done when: Anita assigns a new ticket to Ravi from the phone; Ravi resolves it; Admin can read but has no input box.
+
+### [x] Task 11.7 – Customers (staff)
+
+- List `GET /customers` (name, email, phone), search box filters locally.
+- Detail `GET /customers/{id}`: contact info, orders with status, tickets (tap → ticket screen).
+- Order status change (only the valid next steps: PLACED→SHIPPED, SHIPPED→DELIVERED, PLACED→CANCELLED) → `PATCH /orders/{id}/status`.
+
+Done when: Ravi sees Priya after her ticket is assigned to him and can mark her order SHIPPED; Arjun doesn't see Priya.
+
+### [x] Task 11.8 – Announcements (staff)
+
+- List `GET /announcements`, newest first.
+- ADMIN only: "+" button → create form; long-press an item → Edit / Delete (with confirm).
+
+Done when: admin posts from the phone and it appears on the website; Anita sees it but has no "+" button.
+
+### [x] Task 11.9 – Customer tabs: Shop and Orders
+
+- Tabs: Shop, My Orders, My Tickets, Account.
+- Shop: product cards from `GET /products`; **Book** → quantity stepper 1–10 → `POST /orders` → success message.
+- My Orders: `GET /orders/me` with status badges; **Cancel** (only PLACED, confirm) → `POST /orders/{id}/cancel`; **Need help?** → new-ticket form (category picker, optional subject, message) → `POST /customer/tickets`; if `open_ticket_id` is set show **View conversation** instead.
+
+Done when: Priya books 2 items, cancels one, opens a "Damaged item" ticket on the other; a second "Need help?" on the same order is replaced by "View conversation".
+
+### [x] Task 11.10 – Customer tickets, rating and account
+
+- My Tickets: `GET /customer/tickets`, show "Ravi is helping you" / "Waiting for an agent". Tap → `TicketChat` (portal `customer`).
+- Resolved and unrated → 1–5 stars → `POST /customer/tickets/{id}/rate`.
+- Account: edit name/phone (`PATCH /customer/me`), change password (`POST /customer/me/password`), Log out.
+
+Done when: Priya chats with Ravi, rates the resolved ticket 4, and the staff dashboard's average rating updates.
+
+### [x] Task 11.11 – Polish and full dry run
+
+- App name "Capstone CRM", icon and splash in Orchid colours (`app.json`).
+- Every list: loading spinner, empty state, error state with **Retry**. Every action button shows a spinner and cannot be double-tapped.
+- Two-device dry run: phone as Ravi, website as Priya (then swap) – full flow: book → ticket → Anita assigns → live chat → ship order → resolve → rate.
+- Add a "Mobile app" section to `README.md`: how to run it (backend `--host 0.0.0.0`, `.env`, `npx expo start`, Expo Go).
+
+Done when: the full flow works without touching the website for the staff side or the phone for the customer side.
+
+### Later (mobile)
+
+- Offline read-only cache like the website (store last responses per account).
+- Push notifications for new messages (needs a development build, not Expo Go).
+- Build an installable APK with EAS Build.
 
 ---
 

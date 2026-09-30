@@ -73,3 +73,35 @@ The seed script creates the following default accounts (Password for all: `Passw
 **Customers**:
 - `priya@shop.test`
 - `rahul@shop.test`
+
+## Mobile App (Expo / React Native)
+
+The Capstone CRM mobile application is built with Expo, React Native, and TypeScript for both Staff and Customer portals.
+
+### 1. Backend Host Configuration
+To allow physical phones or Expo Go to connect to your local backend server over Wi-Fi, run the backend listening on all IP interfaces:
+
+```bash
+cd backend
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 2. Environment Setup
+Create a `mobile/.env` file with your machine's Wi-Fi / Local Area Network IP address (e.g. `172.18.188.140` or `192.168.x.x`):
+
+```env
+EXPO_PUBLIC_API_BASE_URL=http://172.18.188.140:8000
+EXPO_PUBLIC_WS_BASE_URL=ws://172.18.188.140:8000
+```
+
+### 3. Launching the App
+Install dependencies and launch Expo Dev Server:
+
+```bash
+cd mobile
+npm install
+npx expo start
+```
+
+Scan the printed QR code using **Expo Go** on iOS or Android to run the mobile application live.
+
