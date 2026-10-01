@@ -11,6 +11,8 @@ router = APIRouter(
 # Add ai-agent to Python path so we can import gemini client
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../ai-agent"))
 
+# Ensure fresh reload
+
 def create_fresh_chat():
     from gemini.client import get_chat_session
     return get_chat_session()

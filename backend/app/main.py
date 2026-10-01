@@ -69,7 +69,7 @@ def health_db_check():
     return {"status": "ok"}
 
 
-from app.routers import auth, oauth, deals, staff, customer, customers, products, orders, tickets, websockets, announcements, dashboard
+from app.routers import auth, oauth, deals, staff, customer, customers, products, orders, tickets, websockets, announcements, dashboard, ai
 app.include_router(auth.router)
 app.include_router(oauth.router)
 app.include_router(deals.router)
@@ -82,3 +82,4 @@ app.include_router(tickets.router)
 app.include_router(websockets.router)
 app.include_router(announcements.router)
 app.include_router(dashboard.router)
+app.include_router(ai.router)

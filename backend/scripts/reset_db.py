@@ -31,9 +31,12 @@ def main() -> None:
     # Drop the entire public schema with CASCADE to remove orphan tables
     # (e.g. notes, tasks) that SQLAlchemy no longer manages.
     with engine.connect() as conn:
-        conn.execute(text("DROP SCHEMA public CASCADE"))
-        conn.execute(text("CREATE SCHEMA public"))
-        conn.commit()
+        if engine.name == "postgresql":
+            conn.execute(text("DROP SCHEMA public CASCADE"))
+            conn.execute(text("CREATE SCHEMA public"))
+            conn.commit()
+    
+    Base.metadata.drop_all(bind=engine)
 
     # Recreate only the tables that are currently in the models.
     Base.metadata.create_all(bind=engine)

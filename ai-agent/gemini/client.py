@@ -7,7 +7,7 @@ from .function_defs import crm_tools
 env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path=env_path)
 api_key = os.getenv("GEMINI_API_KEY")
-raw_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+raw_model = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 model_name = raw_model.removeprefix("models/")
 
 if not api_key or api_key == "your_api_key_here":

@@ -19,8 +19,9 @@ def draft_email_content(recipient_email: str, context: str) -> dict:
     load_dotenv(dotenv_path=env_path)
     _client = google_genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
     
+    model = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
     response = _client.models.generate_content(
-        model="gemini-2.5-flash",
+        model=model,
         contents=f"Recipient Email: {recipient_email}\nContext/Topic: {context}\n\nPlease draft the email.",
         config={
             "system_instruction": (

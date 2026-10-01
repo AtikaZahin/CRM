@@ -189,5 +189,7 @@ def send_smart_emails(emails: list[str], campaign_context: str) -> str:
     return summary
 
 
+from .calendar_service import add_calendar_event
+
 # List of tools to pass to Gemini
-crm_tools = [add_lead, get_leads, delete_lead, get_deals, send_smart_emails]
+crm_tools = [add_lead, get_leads, delete_lead, get_deals, send_smart_emails, add_calendar_event]
