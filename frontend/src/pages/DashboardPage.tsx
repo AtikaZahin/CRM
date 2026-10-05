@@ -121,21 +121,78 @@ const DashboardPage = () => {
         )}
       </div>
 
-      <div className="card card-p" style={{ minHeight: 200, marginTop: 24 }}>
-        <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h2 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 18,
-            fontWeight: 500,
-            fontStyle: 'italic',
-          }}>
-            Recent Activity
-          </h2>
-          <span className="badge badge-neutral">Coming soon</span>
+      {/* Quick Navigation Actions */}
+      <div style={{ marginTop: 24 }}>
+        <h2 style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 18,
+          fontWeight: 500,
+          fontStyle: 'italic',
+          marginBottom: 12
+        }}>
+          Quick Actions
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+          <div 
+            onClick={() => navigate('/staff/support')}
+            className="card card-p"
+            style={{ 
+              cursor: 'pointer', 
+              transition: 'transform 0.15s, border-color 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12
+            }}
+          >
+            <div style={{ fontSize: 24, width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(99, 102, 241, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              🎫
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>Support Center</div>
+              <div style={{ color: 'var(--muted)', fontSize: 12 }}>View and resolve tickets</div>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => navigate('/staff/customers')}
+            className="card card-p"
+            style={{ 
+              cursor: 'pointer', 
+              transition: 'transform 0.15s, border-color 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12
+            }}
+          >
+            <div style={{ fontSize: 24, width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              👥
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>Customers</div>
+              <div style={{ color: 'var(--muted)', fontSize: 12 }}>Browse customer orders</div>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => navigate('/staff/deals')}
+            className="card card-p"
+            style={{ 
+              cursor: 'pointer', 
+              transition: 'transform 0.15s, border-color 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12
+            }}
+          >
+            <div style={{ fontSize: 24, width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              💼
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>Deal Pipeline</div>
+              <div style={{ color: 'var(--muted)', fontSize: 12 }}>Track sales progress</div>
+            </div>
+          </div>
         </div>
-        <p style={{ color: 'var(--muted)', fontSize: 13, fontFamily: 'var(--font-mono)' }}>
-          Activity feed will appear here once the log endpoint is available.
-        </p>
       </div>
     </>
   );

@@ -92,6 +92,8 @@ const CustomersPage = () => {
     return [];
   };
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   const handleOpenTicket = (ticket: TicketResponse) => {
     // Navigate to support page and pass the ticket in the router state
     navigate('/staff/support', { state: { openTicket: ticket } });
@@ -105,10 +107,24 @@ const CustomersPage = () => {
     );
   }
 
+  const filteredCustomers = customers.filter(c => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || (c.phone && c.phone.includes(q)) || c.id.toString().includes(q);
+  });
+
   return (
     <div>
-      <div className="page-header">
-        <h1 className="page-title">Customers</h1>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+        <h1 className="page-title" style={{ margin: 0 }}>Customers</h1>
+        <input
+          type="text"
+          className="input"
+          placeholder="🔍 Search customers by name, email, phone..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ width: 300, maxWidth: '100%' }}
+        />
       </div>
 
       <div className="table-wrapper">
@@ -124,14 +140,14 @@ const CustomersPage = () => {
             </tr>
           </thead>
           <tbody>
-            {customers.length === 0 ? (
+            {filteredCustomers.length === 0 ? (
               <tr>
                 <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--muted)' }}>
                   No customers found.
                 </td>
               </tr>
             ) : (
-              customers.map(c => (
+              filteredCustomers.map(c => (
                 <tr key={c.id}>
                   <td>#{c.id}</td>
                   <td style={{ fontWeight: 500 }}>{c.name}</td>

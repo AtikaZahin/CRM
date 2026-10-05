@@ -108,10 +108,25 @@ const ChatDrawer: React.FC = () => {
                 color: msg.role === 'user' ? '#fff' : 'var(--text-primary)',
                 border: msg.role === 'agent' ? '1px solid var(--border-color)' : 'none',
                 lineHeight: 1.5,
-                whiteSpace: 'pre-wrap'
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word'
               }}
             >
-              {msg.content}
+              {msg.content.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+                part.match(/^https?:\/\//) ? (
+                  <a
+                    key={i}
+                    href={part}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: '#818cf8', textDecoration: 'underline' }}
+                  >
+                    {part}
+                  </a>
+                ) : (
+                  part
+                )
+              )}
             </div>
           ))}
           {isLoading && (

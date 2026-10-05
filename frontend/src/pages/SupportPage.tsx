@@ -49,6 +49,7 @@ const SupportPage = () => {
 
   const isAdmin = currentUser?.role === 'ADMIN';
   const isLead = currentUser?.role === 'LEAD';
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (location.state?.openTicket) {
@@ -399,10 +400,30 @@ const SupportPage = () => {
     );
   }
 
+
+  const filteredTickets = tickets.filter(t => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    const idMatch = t.id.toString().includes(q);
+    const subjectMatch = t.subject.toLowerCase().includes(q);
+    const catLabel = (CATEGORY_LABELS[t.category || 'OTHER'] || t.category || '').toLowerCase();
+    const catMatch = catLabel.includes(q);
+    const orderMatch = t.order_id.toString().includes(q);
+    return idMatch || subjectMatch || catMatch || orderMatch;
+  });
+
   return (
     <div>
-      <div className="page-header">
-        <h1 className="page-title">Support Tickets</h1>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+        <h1 className="page-title" style={{ margin: 0 }}>Support Tickets</h1>
+        <input
+          type="text"
+          className="input"
+          placeholder="🔍 Search tickets by ID, subject, order..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ width: 280, maxWidth: '100%' }}
+        />
       </div>
 
       {/* Pill tab bar */}
@@ -450,14 +471,14 @@ const SupportPage = () => {
               </tr>
             </thead>
             <tbody>
-              {tickets.length === 0 ? (
+              {filteredTickets.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: 'var(--muted)' }}>
                     No tickets found in this view.
                   </td>
                 </tr>
               ) : (
-                tickets.map(t => (
+                filteredTickets.map(t => (
                   <tr key={t.id}>
                     <td>#{t.id}</td>
                     <td>
