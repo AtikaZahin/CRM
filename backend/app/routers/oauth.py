@@ -25,6 +25,7 @@ SCOPES = [
 
 def get_client_config():
     # In a real app, these come from .env
+    load_dotenv(dotenv_path=env_path, override=True)
     client_id = os.getenv("GOOGLE_CLIENT_ID")
     client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
     

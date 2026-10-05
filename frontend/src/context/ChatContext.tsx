@@ -36,9 +36,10 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const response = await axios.post(`${API_URL}/ai/chat`, { message: msg });
       setMessages(prev => [...prev, { role: 'agent', content: response.data.response }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
-      setMessages(prev => [...prev, { role: 'agent', content: 'Sorry, I encountered an error communicating with the server.' }]);
+      const errorMsg = error?.response?.data?.detail || 'Sorry, I encountered an error communicating with the server.';
+      setMessages(prev => [...prev, { role: 'agent', content: typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg) }]);
     } finally {
       setIsLoading(false);
     }
