@@ -2,6 +2,7 @@ import { useColorScheme } from "react-native";
 
 export const lightColors = {
   bg: "#f7f6fb",
+  background: "#f7f6fb",
   surface: "#ffffff",
   surface2: "#f2f0fa",
   blush: "#f1edfd",
@@ -29,6 +30,7 @@ export const lightColors = {
 
 export const darkColors = {
   bg: "#0e0c1b",
+  background: "#0e0c1b",
   surface: "#161329",
   surface2: "#1d1935",
   blush: "#231d42",

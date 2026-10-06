@@ -81,6 +81,10 @@ const checkHealth = async () => {
 
 function startHealthPolling() {
     if (pollTimer != null) return;
+    // Check immediately, then every 15s – otherwise the app stays stuck in
+    // "offline" (blocking login and every other non-GET request) for up to
+    // 15 seconds after a page load where navigator.onLine was false.
+    checkHealth();
     pollTimer = window.setInterval(checkHealth, 15000);
 }
 

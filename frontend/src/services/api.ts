@@ -58,13 +58,15 @@ const cacheKeysFor = (config: InternalAxiosRequestConfig) => ({
 });
 
 // Response Interceptor:
-// - successful GET  -> save a copy for offline use
+// - any successful response  -> mark online (clears the offline banner)
+// - successful GET  -> also save a copy for offline use
 // - failed GET because we're offline -> return the saved copy instead
 api.interceptors.response.use(
   (response) => {
+    // Any successful server response means we are online
+    markOnline();
     const config = response.config;
     if ((config.method || 'get').toLowerCase() === 'get') {
-      markOnline();
       const { ownerKey, urlKey } = cacheKeysFor(config);
       saveResponse(ownerKey, urlKey, response.data);
     }

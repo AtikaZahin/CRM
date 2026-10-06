@@ -171,8 +171,8 @@ const UsersPage = () => {
       if (editingUser) {
         if (formData.password) payload.password = formData.password;
         await api.patch(`/staff/${editingUser.id}`, payload);
-        toast.success('User updated');
-        // Auto-expand the lead the employee was just assigned to
+        // 202 Accepted — permission request was created, not applied yet
+        toast.success('✅ Update request submitted — awaiting admin approval on mobile');
         if (formData.role === 'EMPLOYEE' && newLeadId > 0) {
           setExpandedLeadId(newLeadId);
         }
@@ -180,7 +180,6 @@ const UsersPage = () => {
         payload.password = formData.password;
         await api.post('/staff', payload);
         toast.success('User created');
-        // Auto-expand the lead a newly created employee belongs to
         if (formData.role === 'EMPLOYEE' && newLeadId > 0) {
           setExpandedLeadId(newLeadId);
         }
@@ -203,10 +202,11 @@ const UsersPage = () => {
     if (deleteUserId === null) return;
     try {
       await api.delete(`/staff/${deleteUserId}`);
-      toast.success('User deleted');
+      // 202 Accepted — permission request was created, not applied yet
+      toast.success('🔔 Delete request submitted — awaiting admin approval on mobile', { duration: 5000 });
       fetchUsers();
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Failed to delete user');
+      toast.error(err.response?.data?.detail || 'Failed to submit delete request');
     } finally {
       setDeleteUserId(null);
     }
@@ -256,6 +256,7 @@ const UsersPage = () => {
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -269,6 +270,16 @@ const UsersPage = () => {
                           {u.is_active ? 'Active' : 'Disabled'}
                         </span>
                       </td>
+                      <td>
+                        <button
+                          onClick={() => setDeleteUserId(u.id)}
+                          className="btn btn-ghost btn-sm"
+                          style={{ color: 'var(--ember)' }}
+                          title="Request deletion"
+                        >
+                          Delete
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -277,6 +288,15 @@ const UsersPage = () => {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={deleteUserId !== null}
+        onClose={() => setDeleteUserId(null)}
+        onConfirm={handleAdminDelete}
+        title="Request User Deletion"
+        message="This will submit a deletion request to admins for approval via the mobile app. The user won't be deleted until an admin approves it."
+        confirmText="Submit Request"
+      />
     </>
   );
 
@@ -498,9 +518,9 @@ const UsersPage = () => {
         isOpen={deleteUserId !== null}
         onClose={() => setDeleteUserId(null)}
         onConfirm={handleAdminDelete}
-        title="Delete User"
-        message="Are you sure you want to delete this user? All owned records may lose their primary owner."
-        confirmText="Delete"
+        title="Request User Deletion"
+        message="This will submit a deletion request to admins for approval via the mobile app. The user won't be deleted until an admin approves it."
+        confirmText="Submit Request"
       />
     </>
   );

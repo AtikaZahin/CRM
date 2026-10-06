@@ -1,10 +1,25 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { View, Text, StyleSheet } from "react-native";
 import { useTheme } from "../../../theme";
+import { useStaffAuth } from "../../../auth";
+
+// A tiny badge component for the pending count
+function TabBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <View style={styles.badge}>
+      <Text style={styles.badgeText}>{count > 9 ? "9+" : count}</Text>
+    </View>
+  );
+}
 
 export default function StaffTabsLayout() {
   const { colors } = useTheme();
+  const { user } = useStaffAuth();
+
+  const isAdmin = user?.role === "ADMIN";
 
   return (
     <Tabs
@@ -61,6 +76,20 @@ export default function StaffTabsLayout() {
           ),
         }}
       />
+
+      {/* Approvals tab — only visible to ADMINs */}
+      <Tabs.Screen
+        name="approvals"
+        options={{
+          title: "Approvals",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="shield-checkmark-outline" size={size} color={color} />
+          ),
+          // Hide the tab item from the tab bar for non-admins (do NOT hide the entire tabBarStyle)
+          tabBarItemStyle: isAdmin ? undefined : { display: "none" },
+        }}
+      />
+
       <Tabs.Screen
         name="profile"
         options={{
@@ -73,3 +102,23 @@ export default function StaffTabsLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -8,
+    backgroundColor: "#ef4444",
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 3,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 9,
+    fontWeight: "800",
+  },
+});

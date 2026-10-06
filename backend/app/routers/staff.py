@@ -1,3 +1,4 @@
+import json
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -7,6 +8,7 @@ from pydantic import BaseModel, EmailStr
 from app.database.connection import get_db
 from app.models.user import User
 from app.models.ticket import Ticket
+from app.models.permission_request import PermissionRequest
 from app.schemas.user import UserResponse, StaffUpdateMe
 from app.auth.jwt_handler import get_password_hash
 from app.auth.dependencies import get_current_staff, require_admin
@@ -146,74 +148,87 @@ def create_staff(
     return new_user
 
 
-@router.patch("/{user_id}", response_model=UserResponse)
+@router.patch("/{user_id}", status_code=status.HTTP_202_ACCEPTED)
 def update_staff(
     user_id: int,
     payload: UserUpdateAdmin,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(get_current_staff),
 ):
-    """ADMIN only: update any staff field."""
+    """
+    ADMIN or LEAD: submit a permission request to update a staff member.
+    Returns 202 Accepted with the created permission request details.
+    """
+    # Scope checks
+    if current_user.role not in ("ADMIN", "LEAD"):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    if current_user.role == "LEAD":
+        # LEAD can only request changes for their own team members
+        if user.lead_id != current_user.id and user.id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to modify this staff member")
+
+    # Build the change payload (only non-None fields)
+    changes: dict = {}
     if payload.email is not None:
-        existing = db.query(User).filter(User.email == payload.email, User.id != user_id).first()
-        if existing:
-            raise HTTPException(status_code=400, detail="Email already taken")
-        user.email = payload.email
-
+        changes["email"] = payload.email
     if payload.password:
-        user.hashed_password = get_password_hash(payload.password)
-
+        changes["password"] = payload.password
     if payload.role is not None:
         role = payload.role.upper()
         if role not in VALID_ROLES:
             raise HTTPException(status_code=400, detail=f"Invalid role. Must be one of: {', '.join(VALID_ROLES)}")
-        user.role = role
-
+        changes["role"] = role
     if payload.lead_id is not None:
-        if payload.lead_id == 0:
-            user.lead_id = None
-        else:
-            # Validate that the target lead exists and has role LEAD
-            target_lead = db.query(User).filter(User.id == payload.lead_id).first()
-            if not target_lead:
-                raise HTTPException(status_code=400, detail="The selected lead does not exist")
-            if target_lead.role != "LEAD":
-                raise HTTPException(status_code=400, detail="lead_id must point to a user with role LEAD")
-            user.lead_id = payload.lead_id
-
-    if user.role == "EMPLOYEE" and user.lead_id is None:
-        raise HTTPException(status_code=400, detail="EMPLOYEE must have a lead_id pointing to a LEAD")
-
+        changes["lead_id"] = payload.lead_id
     if payload.is_active is not None:
-        user.is_active = payload.is_active
-        
+        changes["is_active"] = payload.is_active
     if payload.name is not None:
-        user.name = payload.name
+        changes["name"] = payload.name
     if payload.phone is not None:
-        user.phone = payload.phone
+        changes["phone"] = payload.phone
     if payload.profile is not None:
-        user.profile = payload.profile
+        changes["profile"] = payload.profile
 
+    if not changes:
+        raise HTTPException(status_code=400, detail="No changes provided")
+
+    # Create permission request
+    pr = PermissionRequest(
+        requested_by_id=current_user.id,
+        target_user_id=user_id,
+        action_type="UPDATE",
+        payload=json.dumps(changes),
+        status="PENDING",
+    )
+    db.add(pr)
     db.commit()
-    db.refresh(user)
-    
-    if user.role == "LEAD":
-        user.team_count = db.query(func.count(User.id)).filter(User.lead_id == user.id).scalar()
-        
-    return user
+    db.refresh(pr)
+
+    return {
+        "message": "Permission request submitted. Awaiting admin approval.",
+        "permission_request_id": pr.id,
+        "status": pr.status,
+    }
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{user_id}", status_code=status.HTTP_202_ACCEPTED)
 def delete_staff(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(get_current_staff),
 ):
-    """ADMIN only: delete staff."""
+    """
+    ADMIN or LEAD: submit a permission request to delete a staff member.
+    Returns 202 Accepted with the created permission request details.
+    """
+    if current_user.role not in ("ADMIN", "LEAD"):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
     if current_user.id == user_id:
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
 
@@ -221,19 +236,25 @@ def delete_staff(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if user.role == "LEAD":
-        team_count = db.query(func.count(User.id)).filter(User.lead_id == user.id).scalar()
-        if team_count > 0:
-            raise HTTPException(status_code=400, detail="Cannot delete a LEAD who still has employees. Move them first.")
+    if current_user.role == "LEAD":
+        # LEAD can only request deletion of their own team members
+        if user.lead_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Not authorized to delete this staff member")
 
-    if user.role == "EMPLOYEE":
-        in_progress = db.query(func.count(Ticket.id)).filter(
-            Ticket.assigned_employee_id == user.id, 
-            Ticket.status == "IN_PROGRESS"
-        ).scalar()
-        if in_progress > 0:
-            raise HTTPException(status_code=400, detail="Cannot delete an EMPLOYEE with IN_PROGRESS tickets.")
-
-    db.delete(user)
+    # Create permission request
+    pr = PermissionRequest(
+        requested_by_id=current_user.id,
+        target_user_id=user_id,
+        action_type="DELETE",
+        payload=None,
+        status="PENDING",
+    )
+    db.add(pr)
     db.commit()
-    return None
+    db.refresh(pr)
+
+    return {
+        "message": "Permission request submitted. Awaiting admin approval.",
+        "permission_request_id": pr.id,
+        "status": pr.status,
+    }

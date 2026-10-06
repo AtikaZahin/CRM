@@ -7,8 +7,11 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-raw_origins = os.environ.get("FRONTEND_ORIGINS", "http://localhost:5173")
-origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+raw_origins = os.environ.get("FRONTEND_ORIGINS", "*")
+if raw_origins == "*":
+    origins = ["*"]
+else:
+    origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +30,7 @@ from app.models.customer import Customer
 from app.models.order import Order
 from app.models.ticket import Ticket, Message
 from app.models.announcement import Announcement
+from app.models.permission_request import PermissionRequest
 
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError, InterfaceError
@@ -69,7 +73,7 @@ def health_db_check():
     return {"status": "ok"}
 
 
-from app.routers import auth, oauth, deals, staff, customer, customers, products, orders, tickets, websockets, announcements, dashboard, ai
+from app.routers import auth, oauth, deals, staff, customer, customers, products, orders, tickets, websockets, announcements, dashboard, ai, permission_requests
 app.include_router(auth.router)
 app.include_router(oauth.router)
 app.include_router(deals.router)
@@ -83,3 +87,4 @@ app.include_router(websockets.router)
 app.include_router(announcements.router)
 app.include_router(dashboard.router)
 app.include_router(ai.router)
+app.include_router(permission_requests.router)
