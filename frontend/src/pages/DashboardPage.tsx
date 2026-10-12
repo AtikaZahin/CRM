@@ -10,10 +10,10 @@ interface DashboardStats {
   total_employees?: number;
   total_customers?: number;
   total_orders?: number;
-  
+
   team_size?: number;
   unassigned_tickets?: number;
-  
+
   tickets_by_status?: Record<string, number>;
 
   avg_rating?: number | null;
@@ -23,7 +23,7 @@ interface DashboardStats {
 const DashboardPage = () => {
   const { user } = useStaffAuth();
   const navigate = useNavigate();
-  
+
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -133,11 +133,11 @@ const DashboardPage = () => {
           Quick Actions
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-          <div 
+          <div
             onClick={() => navigate('/staff/support')}
             className="card card-p"
-            style={{ 
-              cursor: 'pointer', 
+            style={{
+              cursor: 'pointer',
               transition: 'transform 0.15s, border-color 0.15s',
               display: 'flex',
               alignItems: 'center',
@@ -153,11 +153,11 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          <div 
+          <div
             onClick={() => navigate('/staff/customers')}
             className="card card-p"
-            style={{ 
-              cursor: 'pointer', 
+            style={{
+              cursor: 'pointer',
               transition: 'transform 0.15s, border-color 0.15s',
               display: 'flex',
               alignItems: 'center',
@@ -173,11 +173,11 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          <div 
+          <div
             onClick={() => navigate('/staff/deals')}
             className="card card-p"
-            style={{ 
-              cursor: 'pointer', 
+            style={{
+              cursor: 'pointer',
               transition: 'transform 0.15s, border-color 0.15s',
               display: 'flex',
               alignItems: 'center',

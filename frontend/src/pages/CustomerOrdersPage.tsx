@@ -142,9 +142,9 @@ const CustomerOrdersPage = () => {
                   <td>
                     <div className="row gap-8">
                       {o.status === 'PLACED' && (
-                        <button 
-                          onClick={() => setCancelOrderId(o.id)} 
-                          className="btn btn-ghost btn-sm" 
+                        <button
+                          onClick={() => setCancelOrderId(o.id)}
+                          className="btn btn-ghost btn-sm"
                           style={{ color: 'var(--ember)' }}
                         >
                           Cancel Order
@@ -187,24 +187,24 @@ const CustomerOrdersPage = () => {
           </div>
           <div className="field">
             <label className="label">Subject (Optional)</label>
-            <input 
-              className="input" 
-              value={ticketSubject} 
-              onChange={e => setTicketSubject(e.target.value)} 
+            <input
+              className="input"
+              value={ticketSubject}
+              onChange={e => setTicketSubject(e.target.value)}
               placeholder="Defaults to issue category label if blank"
               maxLength={120}
             />
           </div>
           <div className="field">
             <label className="label">Message</label>
-            <textarea 
-              className="input" 
+            <textarea
+              className="input"
               style={{ minHeight: 120, resize: 'vertical' }}
-              value={ticketMessage} 
-              onChange={e => setTicketMessage(e.target.value)} 
+              value={ticketMessage}
+              onChange={e => setTicketMessage(e.target.value)}
               placeholder="Please describe your issue in detail..."
               maxLength={2000}
-              required 
+              required
             />
           </div>
           <div className="row gap-12" style={{ justifyContent: 'flex-end', marginTop: 12 }}>

@@ -38,10 +38,10 @@ interface CustomerDetailResponse extends CustomerResponse {
 const CustomersPage = () => {
   const [customers, setCustomers] = useState<CustomerResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerDetailResponse | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
-  
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -167,7 +167,7 @@ const CustomersPage = () => {
       </div>
 
       {modalLoading && (
-        <Modal isOpen={true} onClose={() => {}} title="Loading...">
+        <Modal isOpen={true} onClose={() => { }} title="Loading...">
           <div style={{ padding: 40, textAlign: 'center' }}><div className="spinner" /></div>
         </Modal>
       )}
