@@ -13,12 +13,12 @@ router = APIRouter(
     tags=["Deals"]
 )
 
-@router.get("/", response_model=List[DealResponse])
+@router.get("", response_model=List[DealResponse])
 def read_deals(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     deals = db.query(Deal).offset(skip).limit(limit).all()
     return deals
 
-@router.post("/", response_model=DealResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=DealResponse, status_code=status.HTTP_201_CREATED)
 def create_deal(deal: DealCreate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     db_deal = Deal(**deal.model_dump(), owner_id=current_user.id)
     db.add(db_deal)
