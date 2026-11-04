@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
-from typing import List
+from typing import List, Optional
 
 from app.database.connection import get_db
 from app.models.user import User
@@ -94,26 +94,24 @@ def compute_customer_risk(customer_id: int, db: Session) -> CustomerRiskRating:
 
 @router.get("", response_model=List[CustomerResponse])
 def get_customers(
+    search: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_staff),
 ):
     """
-    ADMIN: all customers (with risk rating).
-    LEAD: customers with tickets assigned to their team.
-    EMPLOYEE: customers with tickets assigned to them.
-    All staff roles can access. Records are read-only.
+    ADMIN and EMPLOYEE / LEAD:
+    Can view/search customer list.
+    Filtered by user name/email if search parameter is provided.
+    All records are read-only.
     """
-    if current_user.role == "ADMIN":
-        customers = db.query(Customer).all()
-    elif current_user.role == "LEAD":
-        team_member_ids = [u.id for u in db.query(User.id).filter(User.lead_id == current_user.id).all()]
-        customers = db.query(Customer).join(Ticket, Ticket.customer_id == Customer.id).filter(
-            Ticket.assigned_employee_id.in_(team_member_ids)
-        ).distinct().all()
-    else:  # EMPLOYEE
-        customers = db.query(Customer).join(Ticket, Ticket.customer_id == Customer.id).filter(
-            Ticket.assigned_employee_id == current_user.id
-        ).distinct().all()
+    query = db.query(Customer)
+    if search:
+        search_term = f"%{search.strip()}%"
+        query = query.filter(
+            (Customer.name.ilike(search_term)) |
+            (Customer.email.ilike(search_term))
+        )
+    customers = query.all()
 
     # Attach computed risk rating for each customer
     for c in customers:
