@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
-from typing import cast
+from typing import cast, List
+import datetime as dt
 
 from app.database.connection import get_db
 from app.models.customer import Customer
@@ -10,6 +12,16 @@ from app.schemas.customer import CustomerCreate, CustomerResponse
 from app.schemas.token import Token
 from app.auth.jwt_handler import verify_password, get_password_hash, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.auth.dependencies import get_current_customer
+from app.models.order import Order
+from app.models.ticket import Ticket, Message
+from app.models.user import User
+from app.schemas.ticket import (
+    TicketCreate,
+    CustomerTicketResponse,
+    CustomerMessageResponse,
+    RateTicketRequest,
+    CATEGORY_LABELS,
+)
 
 router = APIRouter(prefix="/customer", tags=["Customer"])
 
@@ -125,11 +137,6 @@ def change_customer_password(
     db.commit()
     return {"message": "Password updated successfully"}
 
-from typing import List
-from app.models.order import Order
-from app.models.ticket import Ticket, Message
-from app.models.user import User
-from app.schemas.ticket import TicketCreate, CustomerTicketResponse, CustomerMessageResponse, RateTicketRequest, CATEGORY_LABELS
 
 def _build_customer_ticket(ticket: Ticket, db: Session) -> CustomerTicketResponse:
     """Build a customer-safe ticket response with agent_first_name and rating populated."""
@@ -160,15 +167,19 @@ def create_customer_ticket(
     current_customer: Customer = Depends(get_current_customer),
 ):
     """Customer opens a new ticket."""
-    order = db.query(Order).filter(Order.id == payload.order_id, Order.customer_id == current_customer.id).first()
+    # Row-lock on order prevents race conditions from concurrent duplicate clicks
+    order = db.query(Order).filter(
+        Order.id == payload.order_id,
+        Order.customer_id == current_customer.id
+    ).with_for_update().first()
     if not order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
 
-    # Check for an existing open ticket on this order (status != RESOLVED)
+    # Check for an existing open ticket on this order (status != RESOLVED) with row-level lock
     existing_ticket = db.query(Ticket).filter(
         Ticket.order_id == payload.order_id,
         Ticket.status != "RESOLVED"
-    ).first()
+    ).with_for_update().first()
     if existing_ticket:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -198,18 +209,37 @@ def create_customer_ticket(
         content=payload.message,
     )
     db.add(message)
-    db.commit()
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        # Catch DB-level partial unique index constraint violation in case of concurrent requests
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="An open ticket already exists for this order"
+        )
+
     db.refresh(ticket)
     return _build_customer_ticket(ticket, db)
 
 
 @router.get("/tickets", response_model=List[CustomerTicketResponse])
 def get_customer_tickets(
+    limit: int = Query(50, ge=1, le=100, description="Maximum number of tickets to return"),
+    skip: int = Query(0, ge=0, description="Number of tickets to skip"),
     db: Session = Depends(get_db),
     current_customer: Customer = Depends(get_current_customer),
 ):
-    """Customer views their tickets."""
-    tickets = db.query(Ticket).filter(Ticket.customer_id == current_customer.id).order_by(Ticket.created_at.desc()).all()
+    """Customer views their tickets (paginated)."""
+    tickets = (
+        db.query(Ticket)
+        .filter(Ticket.customer_id == current_customer.id)
+        .order_by(Ticket.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
     return [_build_customer_ticket(t, db) for t in tickets]
 
 
@@ -249,8 +279,6 @@ def get_customer_ticket_messages(
     return result
 
 
-import datetime as dt
-
 @router.post("/tickets/{ticket_id}/rate", response_model=CustomerTicketResponse)
 def rate_customer_ticket(
     ticket_id: int,
@@ -262,7 +290,7 @@ def rate_customer_ticket(
     ticket = db.query(Ticket).filter(
         Ticket.id == ticket_id,
         Ticket.customer_id == current_customer.id,
-    ).first()
+    ).with_for_update().first()
     if not ticket:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
 

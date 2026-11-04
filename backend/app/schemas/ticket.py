@@ -106,4 +106,4 @@ class TicketAssignRequest(BaseModel):
     employee_id: int
 
 class RateTicketRequest(BaseModel):
-    rating: int
+    rating: int = Field(..., ge=1, le=5, description="Customer rating from 1 to 5 stars")

@@ -37,11 +37,13 @@ from sqlalchemy.exc import OperationalError, InterfaceError
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
-# Create database tables.
+# Create database tables and apply edge-case protection migrations.
 # If the database can't be reached at startup (e.g. no internet), start anyway:
 # requests will get a 503 and the frontend switches to its offline cache.
 try:
     Base.metadata.create_all(bind=engine)
+    from app.database.migrations import run_migrations
+    run_migrations(engine)
 except OperationalError as e:
     print("WARNING: database unreachable at startup – tables not checked:", e.__class__.__name__)
 

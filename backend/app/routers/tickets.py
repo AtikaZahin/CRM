@@ -18,10 +18,12 @@ router = APIRouter(prefix="/tickets", tags=["Tickets"])
 def get_tickets(
     status_filter: Optional[str] = Query(None, alias="status"),
     unassigned: Optional[bool] = Query(None),
+    limit: int = Query(50, ge=1, le=100, description="Maximum number of tickets to return"),
+    skip: int = Query(0, ge=0, description="Number of tickets to skip"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_staff),
 ):
-    """Get tickets based on role and filters."""
+    """Get tickets based on role and filters (paginated)."""
     query = db.query(Ticket)
 
     if current_user.role == "ADMIN":
@@ -44,7 +46,7 @@ def get_tickets(
     if unassigned:
         query = query.filter(Ticket.assigned_employee_id == None)
 
-    return query.order_by(Ticket.created_at.desc()).all()
+    return query.order_by(Ticket.created_at.desc()).offset(skip).limit(limit).all()
 
 
 @router.post("/{ticket_id}/assign")
@@ -55,7 +57,8 @@ def assign_ticket(
     current_user: User = Depends(require_lead_or_admin),
 ):
     """Assign or reassign a ticket to a team member (LEAD or ADMIN)."""
-    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    # Use row-level locking to prevent concurrent assignment race conditions (Breakpoint #2)
+    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).with_for_update().first()
     if not ticket:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ticket not found")
 
@@ -96,7 +99,7 @@ def resolve_ticket(
     current_user: User = Depends(get_current_staff),
 ):
     """Resolve a ticket (assigned employee or their lead)."""
-    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).with_for_update().first()
     if not ticket:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
 

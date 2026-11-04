@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -46,11 +46,20 @@ def create_order(
 
 @router.get("/me", response_model=List[OrderResponse])
 def get_my_orders(
+    limit: int = Query(50, ge=1, le=100, description="Maximum number of orders to return"),
+    skip: int = Query(0, ge=0, description="Number of orders to skip"),
     db: Session = Depends(get_db),
     current_customer: Customer = Depends(get_current_customer),
 ):
-    """Get all orders for the logged-in customer."""
-    orders = db.query(Order).filter(Order.customer_id == current_customer.id).all()
+    """Get all orders for the logged-in customer (paginated)."""
+    orders = (
+        db.query(Order)
+        .filter(Order.customer_id == current_customer.id)
+        .order_by(Order.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
     for o in orders:
         open_ticket = db.query(Ticket).filter(
             Ticket.order_id == o.id,
