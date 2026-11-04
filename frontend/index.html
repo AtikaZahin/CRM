@@ -7,23 +7,25 @@
   <title>Capstone CRM</title>
   <meta name="description" content="Capstone CRM — manage your pipeline, leads, contacts and deals." />
 
-  <!-- Prevent flash of unstyled background -->
+  <!-- Prevent flash of unstyled background and declare local system font stack for air-gap resilience -->
   <style>
     html,
     body {
       background: #f7f6fb;
       margin: 0;
       padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
   </style>
-  <!-- Google Fonts preconnect -->
+
+  <!-- Optional online fonts (gracefully bypassed in offline / air-gapped environments) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-  <!-- Fonts: Playfair Display 500/600/700 + Inter 400/500/600 -->
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
-    rel="stylesheet" />
+    rel="stylesheet"
+    media="print"
+    onload="this.media='all'" />
 </head>
 
 <body>

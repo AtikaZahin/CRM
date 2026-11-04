@@ -8,14 +8,21 @@ router = APIRouter(
     tags=["AI"]
 )
 
-# Add ai-agent to Python path so we can import gemini client
+# Check if running in air-gapped / offline mode
+AIRGAP_MODE = os.environ.get("AIRGAP_MODE", "false").lower() in ("true", "1", "yes")
+
+# Add ai-agent to Python path so we can import gemini client if available
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../ai-agent"))
 
-# Ensure fresh reload
-
 def create_fresh_chat():
-    from gemini.client import get_chat_session
-    return get_chat_session()
+    if AIRGAP_MODE or not os.environ.get("GEMINI_API_KEY"):
+        return None
+    try:
+        from gemini.client import get_chat_session
+        return get_chat_session()
+    except Exception as e:
+        print(f"Warning: External AI client unavailable (Airgap or missing key): {e}")
+        return None
 
 chat = None
 try:
@@ -37,7 +44,7 @@ def extract_text(response) -> str:
             content = getattr(candidate, 'content', None)
             if content:
                 parts = getattr(content, 'parts', None)
-                if parts: # Checks if parts is not None and not empty
+                if parts:
                     for part in parts:
                         text = getattr(part, 'text', "")
                         if text:
@@ -48,12 +55,30 @@ def extract_text(response) -> str:
 @router.post("/chat", response_model=AIChatResponse)
 def chat_with_ai(request: AIChatRequest):
     """
-    Forward the user's chat message to the AI Agent.
+    Forward the user's chat message to the AI Agent with airgap-safe fallback.
     """
     global chat
+    
+    # If in Airgap / Offline mode or no API key, return a deterministic local response
+    if AIRGAP_MODE or not os.environ.get("GEMINI_API_KEY"):
+        return AIChatResponse(
+            response=(
+                "System is running in isolated Air-Gap / Offline mode. "
+                "Outbound cloud AI calls (Gemini API) are disabled to protect data privacy. "
+                "All core CRM actions (Tickets, Deals, Orders, Sockets) are running locally."
+            ),
+            actions_taken=[]
+        )
+
     try:
         if not chat:
             chat = create_fresh_chat()
+
+        if not chat:
+            return AIChatResponse(
+                response="AI service is currently offline or unreachable. Core CRM services remain operational.",
+                actions_taken=[]
+            )
 
         response = chat.send_message(request.message)
         reply_text = extract_text(response)
@@ -69,6 +94,11 @@ def chat_with_ai(request: AIChatRequest):
         print(f"Error in /ai/chat: {e}, refreshing session...")
         try:
             chat = create_fresh_chat()
+            if not chat:
+                return AIChatResponse(
+                    response="External AI provider unreachable. Operating in offline fallback mode.",
+                    actions_taken=[]
+                )
             response = chat.send_message(request.message)
             reply_text = extract_text(response)
             
@@ -81,4 +111,8 @@ def chat_with_ai(request: AIChatRequest):
             )
         except Exception as retry_err:
             print(f"Fatal error in /ai/chat: {retry_err}")
-            raise HTTPException(status_code=500, detail=str(retry_err))
+            # Graceful degrade instead of 500 in air-gapped / disconnected states
+            return AIChatResponse(
+                response="External cloud AI is unreachable. Running in offline fallback mode.",
+                actions_taken=[]
+            )
